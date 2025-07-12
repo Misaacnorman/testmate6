@@ -1,142 +1,170 @@
-# Testmate LIMS (Laboratory Information Management System)
+# Testmate6 - Laboratory Management System
 
-Testmate LIMS is a modern, full-stack Laboratory Information Management System designed for efficient sample tracking, user management, project coordination, and secure communication within laboratory environments. It supports dynamic sample registration, per-set details for concrete-like materials, and robust logging by material category.
-
----
-
-## Table of Contents
-- [Features](#features)
-- [Architecture Overview](#architecture-overview)
-- [Backend](#backend)
-- [Frontend](#frontend)
-- [Database Schema](#database-schema)
-- [Setup & Installation](#setup--installation)
-- [Development & Usage](#development--usage)
-- [Contribution](#contribution)
-- [License](#license)
-- [Contact](#contact)
-
----
+A comprehensive laboratory management system built with Node.js backend and React frontend for managing test samples, clients, projects, and financial operations.
 
 ## Features
-- **Sample Registration**: Register samples with dynamic, per-set fields for concrete, pavers, bricks, blocks, cylinders, and more.
-- **Project & Client Management**: Link samples to projects and clients, manage project status, and client accounts.
-- **User Management**: Role-based access control (Admin, Technician, Manager, Client, etc.), user status, and permissions.
-- **Dynamic Log Books**: Automatic log creation per material category (concrete, pavers, blocks/bricks, cylinders, water absorption, projects).
-- **Sample Receipts & PDF Generation**: Generate sample receipts and logs with consistent formatting.
-- **Secure Authentication**: JWT-based authentication and authorization.
-- **Modern UI/UX**: Responsive React frontend with dynamic forms and tables.
 
----
+- **Sample Management**: Register and track test samples with detailed information
+- **Client Management**: Manage client accounts and project relationships
+- **Project Management**: Organize samples by projects and track progress
+- **Financial Management**: Handle invoices, payments, and financial reporting
+- **User Management**: Role-based access control with admin and regular user roles
+- **Reporting**: Generate comprehensive reports for samples, finances, and operations
+- **PDF Generation**: Generate receipts and invoices in PDF format
 
-## Architecture Overview
-- **Backend**: Node.js, Express, Prisma ORM, MySQL
-- **Frontend**: React (with Vite), TypeScript
-- **Database**: MySQL (schema managed by Prisma)
+## Tech Stack
 
----
+### Backend
+- **Node.js** with Express.js
+- **Prisma ORM** for database management
+- **SQLite** database (can be configured for MySQL/PostgreSQL)
+- **JWT** for authentication
+- **PDF-lib** for PDF generation
+- **Multer** for file uploads
 
-## Backend
-- **Location**: `backend/`
-- **Main Tech**: Node.js, Express, Prisma ORM, MySQL
-- **Key Files**:
-  - `src/index.js`: Main server entry point
-  - `src/controllers/`: API controllers (samples, logs, users, receipts, etc.)
-  - `prisma/schema.prisma`: Database schema
-  - `prisma/seed.js`: Seed data script
-  - `package.json`: Scripts and dependencies
-- **API Structure**:
-  - RESTful endpoints for samples, users, projects, logs, receipts, finance, etc.
-  - JWT authentication middleware
-  - Dynamic log routing by material category
-- **Scripts**:
-  - `npm run dev` — Start backend server
-  - `npm run db:migrate` — Run Prisma migrations
-  - `npm run db:seed` — Seed the database
-  - `npm run db:studio` — Open Prisma Studio
+### Frontend
+- **React** with TypeScript
+- **Vite** for build tooling
+- **React Router** for navigation
+- **CSS** for styling
 
----
+## Project Structure
 
-## Frontend
-- **Location**: `labfrontend/`
-- **Main Tech**: React, Vite, TypeScript
-- **Key Files**:
-  - `src/pages/`: Main pages (RegisterSample, Logs, SampleReceiptsTab, etc.)
-  - `src/components/`: Reusable UI components
-  - `src/api/`: API request logic
-  - `App.tsx`, `main.tsx`: App entry points
-  - `package.json`: Scripts and dependencies
-- **Scripts**:
-  - `npm run dev` — Start frontend dev server
-  - `npm run build` — Build for production
-  - `npm run preview` — Preview production build
+```
+Testmate6/
+├── backend/                 # Node.js backend
+│   ├── src/
+│   │   ├── controllers/    # API controllers
+│   │   ├── routes/         # API routes
+│   │   ├── middleware/     # Authentication middleware
+│   │   └── auth/          # JWT strategy
+│   ├── prisma/            # Database schema and migrations
+│   └── uploads/           # File uploads directory
+├── labfrontend/           # React frontend
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── pages/         # Page components
+│   │   └── api/          # API integration
+└── README.md
+```
 
----
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Git
+
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Testmate6
+   ```
+
+2. **Install backend dependencies**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+3. **Install frontend dependencies**
+   ```bash
+   cd ../labfrontend
+   npm install
+   ```
+
+4. **Set up the database**
+   ```bash
+   cd ../backend
+   npx prisma migrate dev
+   npx prisma generate
+   ```
+
+5. **Create admin user**
+   ```bash
+   node create-admin-user.js
+   ```
+
+## Running the Application
+
+### Backend
+```bash
+cd backend
+npm start
+```
+The backend will run on `http://localhost:3000`
+
+### Frontend
+```bash
+cd labfrontend
+npm run dev
+```
+The frontend will run on `http://localhost:5173`
+
+## Environment Variables
+
+Create a `.env` file in the backend directory:
+
+```env
+JWT_SECRET=your_jwt_secret_here
+PORT=3000
+DATABASE_URL="file:./dev.db"
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+
+### Samples
+- `GET /api/samples` - Get all samples
+- `POST /api/samples` - Create new sample
+- `GET /api/samples/:id` - Get sample by ID
+- `PUT /api/samples/:id` - Update sample
+- `DELETE /api/samples/:id` - Delete sample
+
+### Clients
+- `GET /api/clients` - Get all clients
+- `POST /api/clients` - Create new client
+- `GET /api/clients/:id` - Get client by ID
+- `PUT /api/clients/:id` - Update client
+
+### Projects
+- `GET /api/projects` - Get all projects
+- `POST /api/projects` - Create new project
+- `GET /api/projects/:id` - Get project by ID
+
+### Finance
+- `GET /api/finance` - Get financial data
+- `POST /api/finance/invoice` - Create invoice
+- `POST /api/finance/payment` - Record payment
 
 ## Database Schema
-- **Location**: `backend/prisma/schema.prisma`
-- **Highlights**:
-  - `User`, `Role`, `Permission`: User management and RBAC
-  - `Client`, `Project`, `Sample`, `SampleSet`: Core LIMS entities
-  - `SampleSet`: Per-set details for concrete-like materials
-  - `Log`, `SampleLog`, `ConcreteCubeLog`, `BricksBlocksLog`, `PaversLog`, `ConcreteCylinderLog`, `WaterAbsorptionLog`, `ProjectsLog`: Material-specific logs
-  - `Invoice`, `Payment`, `ClientAccount`, `FinancialTransaction`: Finance
-  - `Report`, `SystemSetting`, `InventoryItem`: Reporting and inventory
 
----
+The application uses Prisma ORM with the following main entities:
 
-## Setup & Installation
+- **User**: System users with roles
+- **Client**: Client information
+- **Project**: Project details
+- **Sample**: Test samples with metadata
+- **SampleLog**: Sample processing logs
+- **Invoice**: Financial invoices
+- **Payment**: Payment records
 
-### Prerequisites
-- Node.js (v18+ recommended)
-- MySQL server
+## Contributing
 
-### 1. Clone the Repository
-```sh
-git clone <your-repo-url>
-cd Testmate6
-```
-
-### 2. Backend Setup
-```sh
-cd backend
-cp .env.example .env # Edit .env with your MySQL credentials
-npm install
-npm run db:generate
-npm run db:migrate
-npm run db:seed # Optional: seed initial data
-npm run dev
-```
-
-### 3. Frontend Setup
-```sh
-cd ../labfrontend
-npm install
-npm run dev
-```
-
----
-
-## Development & Usage
-- **Backend** runs on [http://localhost:3000](http://localhost:3000) by default
-- **Frontend** runs on [http://localhost:5173](http://localhost:5173) by default
-- Update API URLs in frontend `.env` if needed
-- Use Prisma Studio (`npm run db:studio` in backend) for DB inspection
-
----
-
-## Contribution
 1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes
-4. Push to your fork and open a Pull Request
-
----
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
+
 This project is licensed under the MIT License.
 
----
+## Support
 
-## Contact
-For questions, issues, or contributions, please contact the maintainer or open an issue on GitHub.
+For support and questions, please contact the development team.
