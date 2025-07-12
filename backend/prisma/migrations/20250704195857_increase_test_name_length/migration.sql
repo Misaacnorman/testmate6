@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `test` MODIFY `name` VARCHAR(500) NOT NULL,
+    MODIFY `method` VARCHAR(500) NOT NULL;

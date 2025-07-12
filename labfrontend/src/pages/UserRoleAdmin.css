@@ -1,0 +1,527 @@
+.user-role-admin {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.user-role-admin-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.user-role-admin-header h1 {
+  font-size: 2.5rem;
+  color: #1e293b;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 10;
+  padding: 1rem 0 0.5rem 0;
+}
+
+.tab-bar button {
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-bar button.active {
+  background: #3b82f6;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.tab-bar button:not(.active):hover {
+  background: #374151;
+}
+
+.section-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.admin-table th, .admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.admin-table tr:hover {
+  background: #f3f4f6;
+}
+
+.role-badge, .perm-badge, .status-badge {
+  display: inline-block;
+  padding: 0.3em 0.9em;
+  border-radius: 9999px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin: 0 0.2em 0.2em 0;
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.status-badge.active { background: #d1fae5; color: #065f46; }
+.status-badge.inactive { background: #fee2e2; color: #991b1b; }
+.status-badge.suspended { background: #fef3c7; color: #92400e; }
+
+.btn-primary, .btn-secondary, .btn-edit, .btn-delete {
+  background: #2563eb !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-primary:hover, .btn-secondary:hover, .btn-edit:hover, .btn-delete:hover {
+  background: #1d4ed8 !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+.role-management-section .admin-table tbody tr {
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  margin-bottom: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+.role-management-section .admin-table tbody tr:hover {
+  box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+  background: #e0e7ff;
+}
+.role-management-section .admin-table td {
+  vertical-align: middle;
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+}
+.role-management-section .admin-table th, .role-management-section .admin-table td {
+  border-bottom: none;
+}
+.role-management-section .admin-table th {
+  background: #e0e7ff;
+  color: #1e293b;
+}
+
+.permissions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.perm-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1em;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.3em 0.8em;
+  margin-bottom: 0.3em;
+  white-space: nowrap;
+}
+.permissions-list input[type="checkbox"] {
+  accent-color: #2563eb;
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.3em;
+}
+
+.matrix-section {
+  margin-top: 2rem;
+}
+.matrix-scroll {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  padding: 1rem;
+}
+.matrix-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+.matrix-table th, .matrix-table td {
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+}
+.matrix-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+@media (max-width: 900px) {
+  .modal { min-width: 90vw; }
+  .section-card { padding: 1rem; }
+}
+@media (max-width: 600px) {
+  .user-role-admin { padding: 0.5rem; }
+  .section-card { padding: 0.5rem; }
+  .tab-bar { flex-direction: column; gap: 0.5rem; }
+  .modal { padding: 1rem; }
+}
+
+/* Make all text black by default */
+.user-role-admin, .user-role-admin * {
+  color: #111 !important;
+}
+
+/* Fix button text color */
+.tab-bar button,
+.btn-primary,
+.btn-secondary,
+.btn-edit,
+.btn-delete {
+  color: #111 !important;
+}
+.tab-bar button.active {
+  color: #fff !important;
+}
+
+/* Fix badge text color */
+.role-badge, .perm-badge, .status-badge {
+  color: #111 !important;
+}
+
+/* Modal body scrollable */
+.modal-body {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Modal header/footer always visible */
+.modal {
+  display: flex;
+  flex-direction: column;
+}
+.modal-header, .modal-footer {
+  flex-shrink: 0;
+}
+
+/* Modern Modal Styles for User/Role Popups */
+.modern-modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 0;
+  min-width: 350px;
+  max-width: 95vw;
+  width: 480px;
+  position: relative;
+  animation: modalIn 0.25s cubic-bezier(.68,-0.55,.27,1.55);
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem 1rem 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.modal-icon {
+  font-size: 2.2rem;
+  background: #e0e7ff;
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-title-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+.modal-title-section p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0.2rem 0 0 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-left: 1rem;
+}
+.modal-close:hover { color: #ef4444; }
+
+.modern-form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.form-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.form-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.2rem 1rem 1rem 1rem;
+}
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.section-icon {
+  font-size: 1.2rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem 2rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.form-label {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.2rem;
+}
+.required {
+  color: #ef4444;
+  font-size: 1.1em;
+  margin-left: 0.2em;
+}
+.form-input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.btn-cancel {
+  background: #64748b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel:hover { background: #475569; }
+.btn-save {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-save:hover { background: #2563eb; transform: translateY(-2px); }
+.error-message, .success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1rem 0 0 0;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.success-message {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+@media (max-width: 700px) {
+  .modern-modal { width: 98vw; min-width: unset; }
+  .modern-form { padding: 1rem; }
+  .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+/* User Actions Dropdown */
+.user-actions-dash {
+  font-size: 2rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  color: #2563eb;
+  transition: color 0.2s;
+}
+
+.user-actions-dash:hover {
+  color: #1d4ed8;
+}
+
+.user-actions-dropdown {
+  position: absolute;
+  z-index: 10;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  right: 0;
+  min-width: 120px;
+  border: 1px solid #e5e7eb;
+}
+
+.user-actions-dropdown button {
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-actions-dropdown button:hover {
+  background-color: #f3f4f6;
+}
+
+.user-actions-dropdown .btn-edit {
+  color: #2563eb;
+}
+
+.user-actions-dropdown .btn-delete {
+  color: #ef4444;
+}
+
+/* Role Actions Dropdown */
+.role-actions-dash {
+  font-size: 2rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  color: #2563eb;
+  transition: color 0.2s;
+}
+
+.role-actions-dash:hover {
+  color: #1d4ed8;
+}
+
+.role-actions-dropdown {
+  position: absolute;
+  z-index: 10;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  right: 0;
+  min-width: 120px;
+  border: 1px solid #e5e7eb;
+}
+
+.role-actions-dropdown button {
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.role-actions-dropdown button:hover {
+  background-color: #f3f4f6;
+}
+
+.role-actions-dropdown .btn-edit {
+  color: #2563eb;
+}
+
+.role-actions-dropdown .btn-delete {
+  color: #ef4444;
+} 

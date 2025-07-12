@@ -1,0 +1,623 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  name          String
+  email         String    @unique
+  password      String
+  status        String    @default("active") // active, inactive, suspended
+  phoneNumber   String?
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  department    String?
+  roleId        Int
+  role          Role      @relation(fields: [roleId], references: [id])
+  customPermissions String? // JSON array of permission keys
+
+  samples       Sample[]
+  logs          Log[]
+  sentMessages  Message[] @relation("MessageFrom")
+  receivedMessages Message[] @relation("MessageTo")
+
+  submitterSampleTests SampleTest[] @relation("SubmittedByUser")
+  reviewerSampleTests  SampleTest[] @relation("ReviewedByUser")
+  approverSampleTests  SampleTest[] @relation("ApprovedByUser")
+  sampleLogs          SampleLog[] @relation("SampleLogUser")
+  issuedInvoices      Invoice[]   @relation("InvoiceUser")
+  receivedPayments    Payment[]
+  transactions        FinancialTransaction[]
+  
+  // New relationships
+  inventoryItems      InventoryItem[] @relation("InventoryUser")
+  testResults         TestResult[] @relation("TestResultTestedBy")
+  approvedTestResults TestResult[] @relation("TestResultApprovedBy")
+  reports             Report[]
+  systemSettings      SystemSetting[]
+}
+
+model Client {
+  id            Int       @id @default(autoincrement())
+  name          String
+  address       String?
+  contact       String?
+  billingName   String?   // For separate billing info
+  billingAddress String?
+  billingContact String?
+  email         String?
+  phone         String?
+  status        String    @default("active") // active, inactive
+  createdBy     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  samples       Sample[]
+  projects      Project[]
+  invoices      Invoice[]
+  clientAccount ClientAccount?
+  transactions  FinancialTransaction[]
+
+  // Add fields for extended client details
+  sampleDescription String? // Description of the sample
+  sampleStatus      String? // Status of the sample
+}
+
+model Project {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?
+  clientId      Int
+  client        Client    @relation(fields: [clientId], references: [id])
+  status        String    @default("active") // active, completed, cancelled
+  startDate     DateTime?
+  endDate       DateTime?
+  budget        Float?
+  createdBy     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  samples       Sample[]
+}
+
+model Test {
+  id            Int       @id @default(autoincrement())
+  category      String    // MATERIAL CATEGORY
+  code          String    @unique // TEST CODE
+  name          String    @db.VarChar(500) // MATERIAL TEST - increased length
+  method        String    @db.VarChar(500) // TEST METHOD(S) - increased length
+  accredited    Boolean   // TEST ACCREDITATION STATUS
+  unit          String?   // UNIT
+  priceUgx      Int?      // AMOUNT (UGX)
+  priceUsd      Float?    // AMOUNT (USD)
+  leadTimeDays  Int?      // LEAD TIME (DAYS)
+  status        String    @default("active") // active, inactive
+  // description String?  // Not needed for Excel/form
+  // requirements String? // Not needed for Excel/form
+  // equipment   String?  // Not needed for Excel/form
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sampleTests   SampleTest[]
+  testResults   TestResult[]
+  invoiceItems  InvoiceItem[]
+}
+
+model Sample {
+  id            Int       @id @default(autoincrement())
+  sampleCode    String    @unique // Auto-generated code like SMP-2025-001
+  projectId     Int
+  clientId      Int
+  assignedTo    Int?
+  status        String    @default("received") // received, processing, completed, overdue
+  priority      String    @default("medium") // low, medium, high
+  receivedDate  DateTime
+  expectedCompletionDate DateTime?
+  actualCompletionDate DateTime?
+  deliveryInfo  String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  project       Project   @relation(fields: [projectId], references: [id])
+  client        Client    @relation(fields: [clientId], references: [id])
+  assignedUser  User?     @relation(fields: [assignedTo], references: [id])
+  sampleTests   SampleTest[]
+  logs          Log[]
+  invoices      Invoice[]
+  sampleLogs    SampleLog[]
+  testResults   TestResult[]
+  // Add the missing relation for SampleSet
+  sampleSets    SampleSet[]
+}
+
+model SampleTest {
+  id            Int       @id @default(autoincrement())
+  sampleId      Int
+  testId        Int
+  result        String?   // Test outcome
+  submittedBy   Int?
+  reviewedBy    Int?
+  approvedBy    Int?
+  submittedAt   DateTime?
+  reviewedAt    DateTime?
+  approvedAt    DateTime?
+  status        String    @default("pending") // pending, in_progress, completed, failed
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sample        Sample    @relation(fields: [sampleId], references: [id])
+  test          Test      @relation(fields: [testId], references: [id])
+  submitter     User?     @relation("SubmittedByUser", fields: [submittedBy], references: [id])
+  reviewer      User?     @relation("ReviewedByUser", fields: [reviewedBy], references: [id])
+  approver      User?     @relation("ApprovedByUser", fields: [approvedBy], references: [id])
+  testResults   TestResult[]
+}
+
+model TestResult {
+  id            Int       @id @default(autoincrement())
+  sampleId      Int
+  testId        Int
+  sampleTestId  Int?
+  resultValue   String
+  unit          String
+  specification String?
+  status        String    @default("pending") // pass, fail, pending, in_progress
+  testedBy      Int
+  testedDate    DateTime  @default(now())
+  approvedBy    Int?
+  approvedDate  DateTime?
+  remarks       String?
+  attachments   String?   // JSON string of attachment paths
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sample        Sample    @relation(fields: [sampleId], references: [id])
+  test          Test      @relation(fields: [testId], references: [id])
+  sampleTest    SampleTest? @relation(fields: [sampleTestId], references: [id])
+  testedUser    User      @relation("TestResultTestedBy", fields: [testedBy], references: [id])
+  approvedUser  User?     @relation("TestResultApprovedBy", fields: [approvedBy], references: [id])
+}
+
+model SampleLog {
+  id            Int       @id @default(autoincrement())
+  sampleId      Int
+  receivedBy    Int
+  deliveredBy   String?
+  deliveryContact String?
+  modeOfTransmit String   // Email, WhatsApp, Hardcopy
+  createdAt     DateTime  @default(now())
+
+  sample        Sample    @relation(fields: [sampleId], references: [id])
+  user          User      @relation("SampleLogUser", fields: [receivedBy], references: [id])
+
+  // Add fields for extended sample log details
+  dateOfReceipt     DateTime? // Date of receipt
+  timeOfReceipt     String?   // Time of receipt (string for flexibility)
+  receivedByName    String?   // Name of the person who received the sample
+}
+
+model Invoice {
+  id            Int       @id @default(autoincrement())
+  invoiceNumber String    @unique // Auto-generated like INV-2025-001
+  clientId      Int
+  sampleId      Int?
+  issuedBy      Int       // User who issued the invoice
+  amount        Float     // Total amount before tax
+  taxAmount     Float     @default(0) // VAT or other taxes
+  totalAmount   Float     // Total amount including tax
+  currency      String    @default("UGX")
+  status        String    @default("pending") // pending, paid, overdue, cancelled
+  dueDate       DateTime
+  issuedDate    DateTime  @default(now())
+  paidDate      DateTime?
+  notes         String?
+  terms         String?   // Payment terms
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  client        Client    @relation(fields: [clientId], references: [id])
+  sample        Sample?   @relation(fields: [sampleId], references: [id])
+  issuedByUser  User      @relation("InvoiceUser", fields: [issuedBy], references: [id])
+  payments      Payment[]
+  invoiceItems  InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          Int       @id @default(autoincrement())
+  invoiceId   Int
+  description String
+  quantity    Int       @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  testId      Int?      // Reference to the test performed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  test        Test?     @relation(fields: [testId], references: [id])
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  invoiceId     Int
+  amount        Float
+  paymentMethod String    // cash, bank_transfer, mobile_money, cheque, card
+  reference     String?   // Payment reference number
+  notes         String?
+  paymentDate   DateTime  @default(now())
+  receivedBy    Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  receivedByUser User     @relation(fields: [receivedBy], references: [id])
+}
+
+model ClientAccount {
+  id            Int       @id @default(autoincrement())
+  clientId      Int       @unique
+  creditLimit   Float     @default(0)
+  currentBalance Float    @default(0)
+  paymentTerms  String    @default("30 days") // Net 30, Net 60, etc.
+  taxExempt     Boolean   @default(false)
+  taxNumber     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  client        Client    @relation(fields: [clientId], references: [id])
+}
+
+model FinancialTransaction {
+  id            Int       @id @default(autoincrement())
+  type          String    // invoice, payment, adjustment, refund
+  amount        Float
+  description   String
+  reference     String?   // Invoice number, payment reference, etc.
+  clientId      Int?
+  userId        Int       // User who created the transaction
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  client        Client?   @relation(fields: [clientId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model InventoryItem {
+  id            Int       @id @default(autoincrement())
+  itemCode      String    @unique // Auto-generated like EQ-001
+  itemName      String
+  category      String    // equipment, supplies, chemicals, glassware, tools
+  description   String?
+  quantity      Int       @default(0)
+  unit          String
+  minStock      Int       @default(0)
+  maxStock      Int?
+  location      String?
+  supplier      String?
+  cost          Float?
+  status        String    @default("in_stock") // in_stock, low_stock, out_of_stock, maintenance, retired
+  expiryDate    DateTime?
+  calibrationDate DateTime?
+  nextCalibration DateTime?
+  lastUpdated   DateTime  @default(now())
+  updatedBy     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User?     @relation("InventoryUser", fields: [updatedBy], references: [id])
+}
+
+model Report {
+  id            Int       @id @default(autoincrement())
+  name          String
+  type          String    // daily, weekly, monthly, quarterly, annual, custom
+  category      String    // samples, tests, finance, performance, quality, compliance
+  description   String?
+  lastGenerated DateTime?
+  nextScheduled DateTime?
+  status        String    @default("active") // active, inactive, scheduled
+  format        String    @default("pdf") // pdf, excel, csv, html
+  recipients    String?   // JSON string of email addresses
+  createdBy     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User?     @relation(fields: [createdBy], references: [id])
+}
+
+model SystemSetting {
+  id            Int       @id @default(autoincrement())
+  settingKey    String    @unique
+  settingValue  String
+  description   String?
+  category      String    // general, notifications, security, backup
+  updatedBy     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User?     @relation(fields: [updatedBy], references: [id])
+}
+
+model Role {
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  description   String
+  permissions   String    @db.LongText // JSON array of permission keys
+  isSystemRole  Boolean   @default(false)
+  users         User[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Permission {
+  id            Int       @id @default(autoincrement())
+  key           String    @unique // e.g., 'sample.receive', 'test.perform', etc.
+  description   String
+}
+
+model Log {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  sampleId      Int?
+  actionType    String    // sample_received, test_submitted, etc.
+  description   String
+  timestamp     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id])
+  sample        Sample?   @relation(fields: [sampleId], references: [id])
+}
+
+model Message {
+  id            Int       @id @default(autoincrement())
+  fromUserId    Int
+  toUserId      Int
+  content       String
+  read          Boolean   @default(false)
+  timestamp     DateTime  @default(now())
+
+  fromUser      User      @relation("MessageFrom", fields: [fromUserId], references: [id])
+  toUser        User      @relation("MessageTo", fields: [toUserId], references: [id])
+}
+
+model SampleSet {
+  id            Int      @id @default(autoincrement())
+  sampleId      Int
+  category      String   // e.g. Concrete, Pavers, Bricks, Blocks
+  class         String?
+  L             String?
+  W             String?
+  H             String?
+  D             String?  // Diameter for cylinders
+  t             String?  // Thickness for pavers
+  numPerSqm     String?  // Number per sqm for pavers
+  blockType     String?  // solid or hollow
+  holes         Json?    // Array of holes/notches for hollow blocks
+  dateOfCast    DateTime?
+  dateOfTest    DateTime?
+  age           String?
+  areaOfUse     String?
+  serialNumbers Json?    // Array of serial numbers
+  assignedTests Json?    // Array of test names assigned to this set
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sample        Sample   @relation(fields: [sampleId], references: [id])
+}
+
+model ConcreteCubeLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  dateReceived    DateTime?
+  client          String?
+  project         String?
+  castingDate     DateTime?
+  testingDate     DateTime?
+  class           String?
+  ageDays         String?
+  areaOfUse       String?
+  sampleSerial    String?
+  lengthMm        String?
+  widthMm         String?
+  heightMm        String?
+  weightKg        String?
+  machineUsed     String?
+  loadkN          String?
+  modeOfFailure   String?
+  temperatureC    String?
+  certificateNo   String?
+  commentRemark   String?
+  technician      String?
+  dateOfIssue     DateTime?
+  issueId         String?
+  takenBy         String?
+  dateTaken       DateTime?
+  contact         String?
+  receiptNo       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BricksBlocksLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  dateReceived    DateTime?
+  client          String?
+  project         String?
+  castingDate     DateTime?
+  testingDate     DateTime?
+  ageDays         String?
+  areaOfUse       String?
+  sampleSerial    String?
+  sampleType      String?
+  lengthMm        String?
+  widthMm         String?
+  heightMm        String?
+  holeANo         String?
+  holeALMm        String?
+  holeAWMm        String?
+  holeBNo         String?
+  holeBLMm        String?
+  holeBWMm        String?
+  notchNo         String?
+  notchLMm        String?
+  notchWMm        String?
+  weightKg        String?
+  machineUsed     String?
+  loadkN          String?
+  modeOfFailure   String?
+  temperatureC    String?
+  certificateNo   String?
+  commentRemark   String?
+  technician      String?
+  dateOfIssue     DateTime?
+  issueId         String?
+  takenBy         String?
+  dateTaken       DateTime?
+  contact         String?
+  receiptNo       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PaversLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  dateReceived    DateTime?
+  client          String?
+  project         String?
+  castingDate     DateTime?
+  testingDate     DateTime?
+  ageDays         String?
+  areaOfUse       String?
+  sampleSerial    String?
+  paverType       String?
+  lengthMm        String?
+  widthMm         String?
+  heightMm        String?
+  paversPerM2     String?
+  areaMm2         String?
+  weightKg        String?
+  machineUsed     String?
+  loadkN          String?
+  modeOfFailure   String?
+  temperatureC    String?
+  certificateNo   String?
+  commentRemark   String?
+  technician      String?
+  dateOfIssue     DateTime?
+  issueId         String?
+  takenBy         String?
+  dateTaken       DateTime?
+  contact         String?
+  receiptNo       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ConcreteCylinderLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  castingDate     DateTime?
+  testingDate     DateTime?
+  class           String?
+  ageDays         String?
+  areaOfUse       String?
+  sampleSerial    String?
+  diameterMm      String?
+  heightMm        String?
+  weightKg        String?
+  machineUsed     String?
+  loadkN          String?
+  modeOfFailure   String?
+  temperatureC    String?
+  certificateNo   String?
+  commentRemark   String?
+  technician      String?
+  dateOfIssue     DateTime?
+  issueId         String?
+  takenBy         String?
+  dateTaken       DateTime?
+  contact         String?
+  receiptNo       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WaterAbsorptionLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  dateOfReceipt   DateTime?
+  client          String?
+  project         String?
+  castingDate     DateTime?
+  testingDate     DateTime?
+  ageDays         String?
+  areaOfUse       String?
+  sampleSerial    String?
+  sampleType      String?
+  lengthMm        String?
+  widthMm         String?
+  heightMm        String?
+  ovenDriedWeightKg String?
+  weightAfterSoakingKg String?
+  waterWeightKg   String?
+  waterAbsorptionPct String?
+  certificateNo   String?
+  commentRemark   String?
+  technician      String?
+  dateOfIssue     DateTime?
+  issueId         String?
+  takenBy         String?
+  dateTaken       DateTime?
+  contact         String?
+  receiptNo       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ProjectsLog {
+  id              Int      @id @default(autoincrement())
+  sampleId        Int?
+  sampleSetId     Int?
+  date            DateTime?
+  bigProjectId    String?
+  smallProjectId  String?
+  client          String?
+  project         String?
+  engineerInCharge String?
+  fieldTestsDetail String?
+  technicianInCharge String?
+  startDate       DateTime?
+  endDate         DateTime?
+  remarks         String?
+  labTestDescription String?
+  agreedDelivery  DateTime?
+  actualDelivery  DateTime?
+  signature       String?
+  acknowledgement String?
+  reportIssuedBy  String?
+  reportDeliveredTo String?
+  contact         String?
+  dateTime        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Seed data for roles/permissions (add to seed script):
+// Roles: Level 01, Level 02, Level 03, Level 04, Level 05, Super User, Accounts
+// Permissions: sample.receive, test.perform, test.submit, test.review, test.assign, billing.proceed, invoice.issue, finance.view, user.manage, role.manage, etc.
