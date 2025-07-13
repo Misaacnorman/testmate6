@@ -6,6 +6,8 @@ export interface FinancialTransaction {
   type: string;
   date: string;
   description?: string;
+  balance?: number; // Added for compatibility
+  client?: Client;  // Added for compatibility
 }
 const API_BASE_URL = 'http://localhost:4000/api';
 
@@ -115,6 +117,7 @@ export interface ClientAccount {
   createdAt: string;
   updatedAt: string;
   client?: Client;
+  balance?: number; // Added for compatibility
 }
 
 export interface RevenueReport {
@@ -170,9 +173,19 @@ export const financeApi = {
         type: 'credit',
         date: new Date().toISOString(),
         description: 'Sample transaction',
+        balance: 1000, // Added for compatibility
+        client: {
+          id: clientId,
+          name: 'Sample Client',
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }, // Added for compatibility
       },
     ];
   },
+
+  // Stub: Get all transactions
 
   // Stub: Get all transactions
   async getAllTransactions(): Promise<FinancialTransaction[]> {
