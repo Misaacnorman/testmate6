@@ -1,3 +1,12 @@
+// Added for compatibility with components
+export interface FinancialTransaction {
+  id: number;
+  clientId: number;
+  amount: number;
+  type: string;
+  date: string;
+  description?: string;
+}
 const API_BASE_URL = 'http://localhost:4000/api';
 
 // Types
@@ -141,6 +150,44 @@ export interface FinanceReport {
 
 // API Functions
 export const financeApi = {
+  // Stub: Get a single client account by ID
+  async getClientAccount(clientId: number): Promise<ClientAccount> {
+    // This is a stub. Replace with real API call if needed.
+    const accounts = await this.getClientAccounts();
+    const account = accounts.find(acc => acc.clientId === clientId);
+    if (!account) throw new Error('Client account not found');
+    return account;
+  },
+
+  // Stub: Get client transactions
+  async getClientTransactions(clientId: number, _dateFrom?: string, _dateTo?: string): Promise<FinancialTransaction[]> {
+    // This is a stub. Replace with real API call if needed.
+    return [
+      {
+        id: 1,
+        clientId,
+        amount: 1000,
+        type: 'credit',
+        date: new Date().toISOString(),
+        description: 'Sample transaction',
+      },
+    ];
+  },
+
+  // Stub: Get all transactions
+  async getAllTransactions(): Promise<FinancialTransaction[]> {
+    // This is a stub. Replace with real API call if needed.
+    return [
+      {
+        id: 1,
+        clientId: 1,
+        amount: 1000,
+        type: 'credit',
+        date: new Date().toISOString(),
+        description: 'Sample transaction',
+      },
+    ];
+  },
   // Invoice endpoints
   async getInvoices(): Promise<Invoice[]> {
     const response = await fetch(`${API_BASE_URL}/finance/invoices`);
@@ -350,7 +397,7 @@ export const financeApi = {
     return diffDays > 0 ? diffDays : 0;
   },
 
-  async getFinanceReports(startDate?: string, endDate?: string): Promise<FinanceReport> {
+  async getFinanceReports(_startDate?: string, _endDate?: string): Promise<FinanceReport> {
     // Optionally, you can add date filtering if your backend supports it
     const [revenue, outstanding, cashflow] = await Promise.all([
       fetch('/api/finance/reports/revenue').then(r => r.json()),
