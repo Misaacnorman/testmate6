@@ -1,4 +1,4 @@
-import './App.css'
+// ...existing code...
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
@@ -7,7 +7,7 @@ import Finance from './pages/Finance';
 import Register from './pages/Register';
 import Logs from './pages/Logs';
 import Sidebar from './components/Sidebar';
-import UserManagement from './pages/UserManagement';
+// ...existing code...
 import Reports from './pages/Reports';
 import Results from './pages/Results';
 import Inventory from './pages/Inventory';
