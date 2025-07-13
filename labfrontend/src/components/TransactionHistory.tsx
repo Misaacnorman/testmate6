@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { financeApi } from '../api/financeApi';
 import type { FinancialTransaction, Client } from '../api/financeApi';
-import './PaymentModal.css';
+// ...existing code...
 
 const TransactionHistory: React.FC = () => {
   const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
@@ -31,12 +31,7 @@ const TransactionHistory: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await financeApi.getAllTransactions({
-        type: typeFilter === 'all' ? undefined : typeFilter,
-        clientId: clientFilter === 'all' ? undefined : Number(clientFilter),
-        dateFrom,
-        dateTo
-      });
+      const data = await financeApi.getAllTransactions();
       setTransactions(data);
     } catch (err) {
       setError('Failed to load transactions');
@@ -93,7 +88,7 @@ const TransactionHistory: React.FC = () => {
                 <td>{tx.client?.name || '-'}</td>
                 <td>{tx.description}</td>
                 <td>{financeApi.formatCurrency(tx.amount)}</td>
-                <td>{financeApi.formatCurrency(tx.balance)}</td>
+                <td>{financeApi.formatCurrency(tx.balance ?? 0)}</td>
               </tr>
             ))}
           </tbody>

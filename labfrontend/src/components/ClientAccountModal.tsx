@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { financeApi } from '../api/financeApi';
 import type { ClientAccount, FinancialTransaction } from '../api/financeApi';
-import './PaymentModal.css';
+// ...existing code...
 
 interface ClientAccountModalProps {
   isOpen: boolean;
@@ -87,8 +87,8 @@ const ClientAccountModal: React.FC<ClientAccountModalProps> = ({ isOpen, onClose
         ) : account ? (
           <>
             <div className="account-summary">
-              <div><strong>Client:</strong> {account.client.name}</div>
-              <div><strong>Balance:</strong> {financeApi.formatCurrency(account.balance)}</div>
+              <div><strong>Client:</strong> {account.client ? account.client.name : '-'}</div>
+              <div><strong>Balance:</strong> {financeApi.formatCurrency(account.balance ?? 0)}</div>
             </div>
             <div className="filters">
               <label>From: <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} /></label>
@@ -112,7 +112,7 @@ const ClientAccountModal: React.FC<ClientAccountModalProps> = ({ isOpen, onClose
                     <td>{tx.type}</td>
                     <td>{tx.description}</td>
                     <td>{financeApi.formatCurrency(tx.amount)}</td>
-                    <td>{financeApi.formatCurrency(tx.balance)}</td>
+                    <td>{financeApi.formatCurrency(tx.balance ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>

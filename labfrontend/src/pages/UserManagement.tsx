@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import './UserManagement.css';
-import { getUsers, createUser, updateUser, deleteUser, getRoles, getPermissions, createRole, updateRole, deleteRole } from '../api/usersApi';
+// ...existing code...
+import { getUsers, updateUser, deleteUser, getRoles, getPermissions, createRole, updateRole, deleteRole } from '../api/usersApi';
 
 interface User {
   id: number;
@@ -39,7 +39,7 @@ const UserManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -188,19 +188,7 @@ const UserManagement = () => {
     ));
   };
 
-  const handleAddUser = async (user: User) => {
-    setLoading(true);
-    try {
-      const newUser = await createUser(user);
-      setUsers(prev => [...prev, newUser]);
-      setFilteredUsers(prev => [...prev, newUser]);
-      setShowAddModal(false);
-    } catch (err) {
-      console.error('Failed to add user:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Removed unused function handleAddUser
 
   // --- Role Management Handlers ---
   const openAddRole = () => {
@@ -220,8 +208,9 @@ const UserManagement = () => {
   };
   const handleRoleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
-      setRoleForm(f => ({ ...f, [name]: e.target.checked }));
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setRoleForm(f => ({ ...f, [name]: checked }));
     } else {
       setRoleForm(f => ({ ...f, [name]: value }));
     }
@@ -586,4 +575,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement; 
+export default UserManagement;

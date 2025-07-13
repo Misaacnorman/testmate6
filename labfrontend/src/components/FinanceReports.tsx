@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { financeApi } from '../api/financeApi';
 import type { FinanceReport } from '../api/financeApi';
-import './FinanceReports.css';
+// ...existing code...
 
 interface FinanceReportsProps {
   onClose: () => void;
@@ -74,18 +74,7 @@ const FinanceReports: React.FC<FinanceReportsProps> = ({ onClose }) => {
     return `${value.toFixed(1)}%`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'paid':
-        return '#10b981';
-      case 'partial':
-        return '#f59e0b';
-      case 'overdue':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
-  };
+  // ...existing code...
 
   const getPaymentMethodColor = (method: string) => {
     const colors = {

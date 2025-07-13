@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './UserRoleAdmin.css';
+// ...existing code...
 import { getUsers, getRoles, getPermissions, createRole, updateRole, deleteRole, createUser, updateUser, deleteUser } from '../api/usersApi';
 
 // --- Types ---
@@ -104,8 +104,9 @@ const UserRoleAdmin: React.FC = () => {
   };
   const handleRoleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
-      setRoleForm(f => ({ ...f, [name]: e.target.checked }));
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setRoleForm(f => ({ ...f, [name]: checked }));
     } else {
       setRoleForm(f => ({ ...f, [name]: value }));
     }
