@@ -14,6 +14,7 @@
     "start": "node src/index.js",
     "build": "echo 'No build step required'"
   },
+  "_note": "This is a backend Node.js/Express service. Use as a Web Service on Render, not a Static Site.",
   "keywords": [],
   "author": "",
   "license": "ISC",
