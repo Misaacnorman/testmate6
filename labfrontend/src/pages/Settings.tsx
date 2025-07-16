@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './Settings.css';
 import { getSettings, updateSetting } from '../api/settingsApi';
 
@@ -93,9 +93,13 @@ const Settings = () => {
     try {
       // Save all settings as one object
       await updateSetting(1, {
-        systemSettings,
-        notificationSettings,
-        securitySettings
+        key: 'system_config',
+        value: JSON.stringify({
+          systemSettings,
+          notificationSettings,
+          securitySettings
+        }),
+        category: 'system'
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);

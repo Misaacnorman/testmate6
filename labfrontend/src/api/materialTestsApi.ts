@@ -1,5 +1,21 @@
 const API_BASE = 'http://localhost:4000/api/material-tests';
 
+interface MaterialTest {
+  id: number;
+  name: string;
+  category: string;
+  description?: string | null;
+  procedure?: string | null;
+  equipment?: string | null;
+  duration?: number | null;
+  cost?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type CreateMaterialTestData = Omit<MaterialTest, 'id' | 'createdAt' | 'updatedAt'>;
+type UpdateMaterialTestData = Partial<CreateMaterialTestData>;
+
 export async function getMaterialTests() {
   const res = await fetch(API_BASE);
   if (!res.ok) throw new Error('Failed to fetch material tests');
@@ -12,7 +28,7 @@ export async function getMaterialTest(id: number) {
   return res.json();
 }
 
-export async function createMaterialTest(data: any) {
+export async function createMaterialTest(data: CreateMaterialTestData) {
   const res = await fetch(API_BASE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -22,7 +38,7 @@ export async function createMaterialTest(data: any) {
   return res.json();
 }
 
-export async function updateMaterialTest(id: number, data: any) {
+export async function updateMaterialTest(id: number, data: UpdateMaterialTestData) {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './Inventory.css';
 import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from '../api/inventoryApi';
 
@@ -34,14 +34,14 @@ interface InventorySummary {
 const Inventory = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>([]);
-  const [summary, setSummary] = useState<InventorySummary>({
+  const summary: InventorySummary = {
     totalItems: 0,
     lowStockItems: 0,
     outOfStockItems: 0,
     totalValue: 0,
     itemsNeedingCalibration: 0,
     expiringItems: 0
-  });
+  };
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
