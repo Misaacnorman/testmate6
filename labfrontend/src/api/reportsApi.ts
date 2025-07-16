@@ -1,5 +1,19 @@
 const API_BASE = 'http://localhost:4000/api/reports';
 
+interface Report {
+  id: number;
+  title: string;
+  description?: string;
+  type: 'financial' | 'technical' | 'inventory' | 'summary';
+  dateRange?: { start: string; end: string };
+  data?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type CreateReportData = Omit<Report, 'id' | 'createdAt' | 'updatedAt'>;
+type UpdateReportData = Partial<CreateReportData>;
+
 export async function getReports() {
   const res = await fetch(API_BASE);
   if (!res.ok) throw new Error('Failed to fetch reports');
@@ -12,7 +26,7 @@ export async function getReport(id: number) {
   return res.json();
 }
 
-export async function createReport(data: any) {
+export async function createReport(data: CreateReportData) {
   const res = await fetch(API_BASE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -22,7 +36,7 @@ export async function createReport(data: any) {
   return res.json();
 }
 
-export async function updateReport(id: number, data: any) {
+export async function updateReport(id: number, data: UpdateReportData) {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

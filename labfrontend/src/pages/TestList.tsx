@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './TestList.css';
 import { getMaterialTests, createMaterialTest, updateMaterialTest, deleteMaterialTest, deleteAllMaterialTests, exportMaterialTests } from '../api/materialTestsApi';
 import * as XLSX from 'xlsx';
