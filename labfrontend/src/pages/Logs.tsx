@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { getSampleReceipts } from '../api/sampleLogsApi';
+import { useState } from 'react';
 import './Logs.css';
 
 const TABS = [

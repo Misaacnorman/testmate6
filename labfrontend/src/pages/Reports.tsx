@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './Reports.css';
 import { getReports, createReport, updateReport, deleteReport } from '../api/reportsApi';
 

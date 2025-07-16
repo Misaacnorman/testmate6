@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { financeApi } from '../api/financeApi';
-import type { Invoice, Payment, ClientAccount, RevenueReport, OutstandingReport, CashFlowReport } from '../api/financeApi';
+import type { Invoice, RevenueReport } from '../api/financeApi';
 import CreateInvoiceModal from '../components/CreateInvoiceModal';
 import PaymentModal from '../components/PaymentModal';
 import FinanceReports from '../components/FinanceReports';
@@ -19,11 +19,7 @@ interface FinancialSummary {
 
 const Finance = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>([]);
   const [revenueReport, setRevenueReport] = useState<RevenueReport | null>(null);
-  const [outstandingReport, setOutstandingReport] = useState<OutstandingReport | null>(null);
-  const [cashFlowReport, setCashFlowReport] = useState<CashFlowReport | null>(null);
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [summary, setSummary] = useState<FinancialSummary>({
     totalRevenue: 0,
@@ -51,21 +47,15 @@ const Finance = () => {
     setError(null);
     try {
       // Fetch all financial data in parallel
-      const [invoicesData, paymentsData, clientAccountsData, revenueData, outstandingData, cashFlowData] = await Promise.all([
+      const [invoicesData, paymentsData, , revenueData] = await Promise.all([
         financeApi.getInvoices(),
         financeApi.getPayments(),
         financeApi.getClientAccounts(),
         financeApi.getRevenueReport(),
-        financeApi.getOutstandingReport(),
-        financeApi.getCashFlowReport()
       ]);
 
       setInvoices(invoicesData);
-      setPayments(paymentsData);
-      setClientAccounts(clientAccountsData);
       setRevenueReport(revenueData);
-      setOutstandingReport(outstandingData);
-      setCashFlowReport(cashFlowData);
 
       // Calculate summary
       const totalRevenue = paymentsData.reduce((sum, payment) => sum + payment.amount, 0);

@@ -108,7 +108,6 @@ const initialSpecialDetails: SpecialSampleDetails = {
 };
 
 const RegisterSample = () => {
-  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<ClientSampleForm>(initialForm);
   const [step, setStep] = useState(1);
   const [materialTests, setMaterialTests] = useState<any[]>([]);

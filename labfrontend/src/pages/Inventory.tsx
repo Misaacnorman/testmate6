@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './Inventory.css';
 import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from '../api/inventoryApi';
 
