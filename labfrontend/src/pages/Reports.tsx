@@ -26,13 +26,13 @@ interface ReportData {
 const Reports = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [filteredReports, setFilteredReports] = useState<Report[]>([]);
-  const [reportData, setReportData] = useState<ReportData>({
+  const reportData: ReportData = {
     totalReports: 0,
     activeReports: 0,
     scheduledReports: 0,
     lastWeekGenerated: 0,
     popularReports: []
-  });
+  };
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');

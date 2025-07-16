@@ -109,11 +109,11 @@ const SampleReceiptsTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
-  const [projectFilter, setProjectFilter] = useState('');
-  const [receivedByFilter, setReceivedByFilter] = useState('');
+  const dateFrom = '';
+  const dateTo = '';
+  const clientFilter = '';
+  const projectFilter = '';
+  const receivedByFilter = '';
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
 
   const fetchSampleReceipts = async () => {
@@ -143,7 +143,7 @@ const SampleReceiptsTab = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (_event: MouseEvent) => {
       if (dropdownOpen !== null) {
         setDropdownOpen(null);
       }

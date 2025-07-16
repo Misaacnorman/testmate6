@@ -33,14 +33,14 @@ interface ResultsSummary {
 const Results = () => {
   const [results, setResults] = useState<TestResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<TestResult[]>([]);
-  const [summary, setSummary] = useState<ResultsSummary>({
+  const summary: ResultsSummary = {
     totalResults: 0,
     passedTests: 0,
     failedTests: 0,
     pendingTests: 0,
     averageTurnaroundTime: 0,
     qualityScore: 0
-  });
+  };
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

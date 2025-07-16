@@ -50,7 +50,7 @@ const TestList = () => {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState<number | null>(null);
-  const [importing, setImporting] = useState(false);
+  const importing = false;
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -235,12 +235,11 @@ const TestList = () => {
         requirements: Array.isArray(form.requirements) && form.requirements.length > 0 ? JSON.stringify(form.requirements) : null,
         equipment: Array.isArray(form.equipment) && form.equipment.length > 0 ? JSON.stringify(form.equipment) : null,
       };
-      let result;
       if (editId) {
-        result = await updateMaterialTest(editId, apiData);
+        await updateMaterialTest(editId, apiData);
         setSuccess('Material test updated successfully!');
       } else {
-        result = await createMaterialTest(apiData);
+        await createMaterialTest(apiData);
         setSuccess('Material test created successfully!');
       }
       setShowModal(false);
