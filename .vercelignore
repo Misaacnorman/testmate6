@@ -1,0 +1,10 @@
+backend/
+*.md
+node_modules/
+.git/
+labfrontend/src/
+labfrontend/node_modules/
+labfrontend/.tmp/
+labfrontend/tsconfig*.json
+labfrontend/eslint.config.js
+labfrontend/vite.config.ts
