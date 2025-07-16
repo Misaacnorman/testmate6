@@ -169,7 +169,18 @@ const Results = () => {
   const handleAddResult = async (result: TestResult) => {
     setLoading(true);
     try {
-      const newResult = await createResult(result);
+      // Transform to match API interface
+      const createData = {
+        sampleId: parseInt(result.sampleCode) || 0, // Convert sampleCode to number
+        testId: parseInt(result.testCode) || 0, // Convert testCode to number  
+        value: result.resultValue,
+        unit: result.unit,
+        status: result.status as 'pending' | 'in_progress' | 'pass' | 'fail',
+        notes: result.remarks,
+        testDate: result.testedDate,
+        completedBy: result.testedBy
+      };
+      const newResult = await createResult(createData);
       setResults(prev => [...prev, newResult]);
       setFilteredResults(prev => [...prev, newResult]);
     } catch (err) {
@@ -182,7 +193,18 @@ const Results = () => {
   const handleEditResult = async (result: TestResult) => {
     setLoading(true);
     try {
-      const updated = await updateResult(result.id, result);
+      // Transform to match API interface
+      const updateData = {
+        sampleId: parseInt(result.sampleCode) || 0,
+        testId: parseInt(result.testCode) || 0,  
+        value: result.resultValue,
+        unit: result.unit,
+        status: result.status as 'pending' | 'in_progress' | 'pass' | 'fail',
+        notes: result.remarks,
+        testDate: result.testedDate,
+        completedBy: result.testedBy
+      };
+      const updated = await updateResult(result.id, updateData);
       setResults(prev => prev.map(r => r.id === result.id ? updated : r));
       setFilteredResults(prev => prev.map(r => r.id === result.id ? updated : r));
     } catch (err) {

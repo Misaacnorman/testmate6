@@ -146,7 +146,20 @@ const Reports = () => {
   const handleAddReport = async (report: Report) => {
     setLoading(true);
     try {
-      const newReport = await createReport(report);
+      // Transform to match API interface
+      const createData = {
+        title: report.name,
+        description: report.description,
+        type: 'summary' as const, // Map to valid API type
+        dateRange: undefined,
+        data: {
+          category: report.category,
+          format: report.format,
+          recipients: report.recipients,
+          originalType: report.type
+        }
+      };
+      const newReport = await createReport(createData);
       setReports(prev => [...prev, newReport]);
       setFilteredReports(prev => [...prev, newReport]);
     } catch (err) {
@@ -159,7 +172,19 @@ const Reports = () => {
   const handleEditReport = async (report: Report) => {
     setLoading(true);
     try {
-      const updated = await updateReport(report.id, report);
+      // Transform to match API interface
+      const updateData = {
+        title: report.name,
+        description: report.description,
+        type: 'summary' as const, // Map to valid API type
+        data: {
+          category: report.category,
+          format: report.format,
+          recipients: report.recipients,
+          originalType: report.type
+        }
+      };
+      const updated = await updateReport(report.id, updateData);
       setReports(prev => prev.map(r => r.id === report.id ? updated : r));
       setFilteredReports(prev => prev.map(r => r.id === report.id ? updated : r));
     } catch (err) {
