@@ -1,3 +1,9 @@
+// Debug: Log where express is being resolved from
+try {
+  console.log('Express resolved to:', require.resolve('express'));
+} catch (e) {
+  console.error('Express could not be resolved:', e);
+}
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
