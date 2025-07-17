@@ -1,170 +1,93 @@
-# Testmate6 - Laboratory Management System
+# Testmate LIMS Backend
 
-A comprehensive laboratory management system built with Node.js backend and React frontend for managing test samples, clients, projects, and financial operations.
+This is the backend service for Testmate LIMS, a Laboratory Information Management System. It provides RESTful APIs, authentication, business logic, and database management for the platform.
+
+---
 
 ## Features
+- Node.js + Express REST API
+- Prisma ORM with MySQL
+- JWT authentication and role-based access control
+- Dynamic sample registration and per-set details
+- Material-specific log books (concrete, pavers, blocks, cylinders, water absorption, projects)
+- Project, client, user, and finance management
+- PDF generation for sample receipts and logs
 
-- **Sample Management**: Register and track test samples with detailed information
-- **Client Management**: Manage client accounts and project relationships
-- **Project Management**: Organize samples by projects and track progress
-- **Financial Management**: Handle invoices, payments, and financial reporting
-- **User Management**: Role-based access control with admin and regular user roles
-- **Reporting**: Generate comprehensive reports for samples, finances, and operations
-- **PDF Generation**: Generate receipts and invoices in PDF format
-
-## Tech Stack
-
-### Backend
-- **Node.js** with Express.js
-- **Prisma ORM** for database management
-- **SQLite** database (can be configured for MySQL/PostgreSQL)
-- **JWT** for authentication
-- **PDF-lib** for PDF generation
-- **Multer** for file uploads
-
-### Frontend
-- **React** with TypeScript
-- **Vite** for build tooling
-- **React Router** for navigation
-- **CSS** for styling
+---
 
 ## Project Structure
+- `src/index.js` — Main server entry
+- `src/controllers/` — API controllers (samples, logs, users, receipts, etc.)
+- `src/routes/` — Express route definitions
+- `prisma/schema.prisma` — Database schema
+- `prisma/seed.js` — Seed data script
+- `package.json` — Scripts and dependencies
 
+---
+
+## Setup & Installation
+
+### Prerequisites
+- Node.js (v18+ recommended)
+- MySQL server
+
+### 1. Environment Setup
+Copy `.env.example` to `.env` and update with your MySQL credentials and JWT secret.
+
+### 2. Install Dependencies
+```sh
+npm install
 ```
-Testmate6/
-├── backend/                 # Node.js backend
-│   ├── src/
-│   │   ├── controllers/    # API controllers
-│   │   ├── routes/         # API routes
-│   │   ├── middleware/     # Authentication middleware
-│   │   └── auth/          # JWT strategy
-│   ├── prisma/            # Database schema and migrations
-│   └── uploads/           # File uploads directory
-├── labfrontend/           # React frontend
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── pages/         # Page components
-│   │   └── api/          # API integration
-└── README.md
+
+### 3. Database Setup
+```sh
+npm run db:generate      # Generate Prisma client
+npm run db:migrate       # Run migrations
+npm run db:seed          # (Optional) Seed initial data
+npm run db:studio        # (Optional) Open Prisma Studio
 ```
 
-## Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-- Git
-
-## Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Testmate6
-   ```
-
-2. **Install backend dependencies**
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. **Install frontend dependencies**
-   ```bash
-   cd ../labfrontend
-   npm install
-   ```
-
-4. **Set up the database**
-   ```bash
-   cd ../backend
-   npx prisma migrate dev
-   npx prisma generate
-   ```
-
-5. **Create admin user**
-   ```bash
-   node create-admin-user.js
-   ```
-
-## Running the Application
-
-### Backend
-```bash
-cd backend
-npm start
-```
-The backend will run on `http://localhost:3000`
-
-### Frontend
-```bash
-cd labfrontend
+### 4. Start the Server
+```sh
 npm run dev
 ```
-The frontend will run on `http://localhost:5173`
 
-## Environment Variables
-
-Create a `.env` file in the backend directory:
-
-```env
-JWT_SECRET=your_jwt_secret_here
-PORT=3000
-DATABASE_URL="file:./dev.db"
-```
+---
 
 ## API Endpoints
+- `/api/samples` — Sample registration, retrieval, update
+- `/api/logs` — Log book management
+- `/api/users` — User management
+- `/api/clients` — Client management
+- `/api/projects` — Project management
+- `/api/receipts` — Sample receipts
+- `/api/finance` — Invoices, payments, transactions
 
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
+(See code for full endpoint list and details.)
 
-### Samples
-- `GET /api/samples` - Get all samples
-- `POST /api/samples` - Create new sample
-- `GET /api/samples/:id` - Get sample by ID
-- `PUT /api/samples/:id` - Update sample
-- `DELETE /api/samples/:id` - Delete sample
-
-### Clients
-- `GET /api/clients` - Get all clients
-- `POST /api/clients` - Create new client
-- `GET /api/clients/:id` - Get client by ID
-- `PUT /api/clients/:id` - Update client
-
-### Projects
-- `GET /api/projects` - Get all projects
-- `POST /api/projects` - Create new project
-- `GET /api/projects/:id` - Get project by ID
-
-### Finance
-- `GET /api/finance` - Get financial data
-- `POST /api/finance/invoice` - Create invoice
-- `POST /api/finance/payment` - Record payment
+---
 
 ## Database Schema
+See `prisma/schema.prisma` for full schema. Key models:
+- User, Role, Permission
+- Client, Project, Sample, SampleSet
+- Log, SampleLog, ConcreteCubeLog, BricksBlocksLog, PaversLog, ConcreteCylinderLog, WaterAbsorptionLog, ProjectsLog
+- Invoice, Payment, ClientAccount, FinancialTransaction
+- Report, SystemSetting, InventoryItem
 
-The application uses Prisma ORM with the following main entities:
+---
 
-- **User**: System users with roles
-- **Client**: Client information
-- **Project**: Project details
-- **Sample**: Test samples with metadata
-- **SampleLog**: Sample processing logs
-- **Invoice**: Financial invoices
-- **Payment**: Payment records
+## Development
+- Use `npm run dev` for development
+- Use `npm run db:studio` to inspect the database
+- Update `.env` for environment variables
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---
 
 ## License
+MIT
 
-This project is licensed under the MIT License.
+---
 
-## Support
-
-For support and questions, please contact the development team.
+## Contact
+For issues or contributions, open an issue or pull request on GitHub.
