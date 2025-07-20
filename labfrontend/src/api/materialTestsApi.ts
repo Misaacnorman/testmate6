@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:4000/api/material-tests';
+import { supabase, handleError } from '../utils/supabaseClient';
 
 interface MaterialTest {
   id: number;
@@ -17,81 +17,162 @@ type CreateMaterialTestData = Omit<MaterialTest, 'id' | 'createdAt' | 'updatedAt
 type UpdateMaterialTestData = Partial<CreateMaterialTestData>;
 
 export async function getMaterialTests() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error('Failed to fetch material tests');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getMaterialTest(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch material test');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function createMaterialTest(data: CreateMaterialTestData) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create material test');
-  return res.json();
+  try {
+    const { data: newTest, error } = await supabase
+      .from('MaterialTest')
+      .insert([data])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return newTest;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function updateMaterialTest(id: number, data: UpdateMaterialTestData) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update material test');
-  return res.json();
+  try {
+    const { data: updatedTest, error } = await supabase
+      .from('MaterialTest')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return updatedTest;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function deleteMaterialTest(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete material test');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function deleteAllMaterialTests() {
-  const res = await fetch(`${API_BASE}/all`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete all material tests');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .delete()
+      .neq('id', 0); // Delete all records
+    
+    if (error) throw error;
+    return { success: true, count: data?.length || 0 };
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function exportMaterialTests() {
-  const res = await fetch(`${API_BASE}/export`, {
-    method: 'GET',
-  });
-  if (!res.ok) throw new Error('Failed to export material tests');
-  
-  // Create blob and download
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'material-tests-export.xlsx';
-  document.body.appendChild(a);
-  a.click();
-  window.URL.revokeObjectURL(url);
-  document.body.removeChild(a);
-  
-  return { success: true };
+  try {
+    // Get all material tests
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .select('*');
+    
+    if (error) throw error;
+    
+    // Convert to XLSX format (this would typically require a library like xlsx)
+    // For demo purposes, we'll create a CSV as text/csv blob
+    const headers = ['id', 'name', 'category', 'description', 'procedure', 'equipment', 'duration', 'cost', 'createdAt', 'updatedAt'];
+    const csvContent = [
+      headers.join(','),
+      ...data.map(item => 
+        headers.map(header => 
+          item[header] !== null && item[header] !== undefined ? 
+          `"${String(item[header]).replace(/"/g, '""')}"` : 
+          ''
+        ).join(',')
+      )
+    ].join('\n');
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'material-tests-export.csv';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    return { success: true };
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getMaterialCategories() {
-  const res = await fetch(`${API_BASE}/categories`);
-  if (!res.ok) throw new Error('Failed to fetch material categories');
-  return res.json();
+  try {
+    // Get distinct categories
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .select('category')
+      .order('category');
+    
+    if (error) throw error;
+    
+    // Extract unique categories
+    const uniqueCategories = [...new Set(data.map(item => item.category))];
+    return uniqueCategories;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getMaterialTestsByCategory(category: string) {
-  const res = await fetch(`${API_BASE}?category=${encodeURIComponent(category)}`);
-  if (!res.ok) throw new Error('Failed to fetch material tests for category');
-  return res.json();
-} 
+  try {
+    const { data, error } = await supabase
+      .from('MaterialTest')
+      .select('*')
+      .eq('category', category);
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
+}

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:4000/api/inventory';
+import { supabase, handleError } from '../utils/supabaseClient';
 
 interface InventoryItem {
   id: number;
@@ -24,41 +24,88 @@ type CreateInventoryItemData = Omit<InventoryItem, 'id' | 'lastUpdated'>;
 type UpdateInventoryItemData = Partial<CreateInventoryItemData>;
 
 export async function getInventory() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error('Failed to fetch inventory');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Inventory')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getInventoryItem(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch inventory item');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Inventory')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function createInventoryItem(data: CreateInventoryItemData) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create inventory item');
-  return res.json();
+  try {
+    // Set the lastUpdated field to current timestamp
+    const itemWithTimestamp = {
+      ...data,
+      lastUpdated: new Date().toISOString(),
+    };
+    
+    const { data: newItem, error } = await supabase
+      .from('Inventory')
+      .insert([itemWithTimestamp])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return newItem;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function updateInventoryItem(id: number, data: UpdateInventoryItemData) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update inventory item');
-  return res.json();
+  try {
+    // Set the lastUpdated field to current timestamp
+    const updateWithTimestamp = {
+      ...data,
+      lastUpdated: new Date().toISOString(),
+    };
+    
+    const { data: updatedItem, error } = await supabase
+      .from('Inventory')
+      .update(updateWithTimestamp)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return updatedItem;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function deleteInventoryItem(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete inventory item');
-  return res.json();
-} 
+  try {
+    const { data, error } = await supabase
+      .from('Inventory')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
+}

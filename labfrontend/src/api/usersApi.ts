@@ -1,6 +1,4 @@
-const API_BASE = 'http://localhost:4000/api/users';
-const ROLE_BASE = 'http://localhost:4000/api/roles';
-const PERM_BASE = 'http://localhost:4000/api/permissions';
+import { supabase, handleError } from '../utils/supabaseClient';
 
 export interface User {
   id: number;
@@ -14,106 +12,188 @@ export interface User {
 }
 
 export async function getUsers() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error('Failed to fetch users');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('User')
+      .select('*, role:roleId(name)');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getUser(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch user');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('User')
+      .select('*, role:roleId(name)')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function createUser(data: any) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: 'Failed to create user' }));
-    throw new Error(errorData.error || 'Failed to create user');
+  try {
+    // If authentication is required, first create auth user
+    // const { data: authData, error: authError } = await supabase.auth.signUp({
+    //   email: data.email,
+    //   password: data.password,
+    // });
+    // if (authError) throw authError;
+
+    // Then create DB user
+    const { data: newUser, error } = await supabase
+      .from('User')
+      .insert([data])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return newUser;
+  } catch (error) {
+    return handleError(error);
   }
-  return res.json();
 }
 
 export async function updateUser(id: number, data: any) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: 'Failed to update user' }));
-    throw new Error(errorData.error || 'Failed to update user');
+  try {
+    const { data: updatedUser, error } = await supabase
+      .from('User')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return updatedUser;
+  } catch (error) {
+    return handleError(error);
   }
-  return res.json();
 }
 
 export async function deleteUser(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete user');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('User')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 // --- Role and Permission Management ---
 export async function getRoles() {
-  const res = await fetch(ROLE_BASE);
-  if (!res.ok) throw new Error('Failed to fetch roles');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Role')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getRole(id: number) {
-  const res = await fetch(`${ROLE_BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch role');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Role')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function createRole(data: any) {
-  const res = await fetch(ROLE_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create role');
-  return res.json();
+  try {
+    const { data: newRole, error } = await supabase
+      .from('Role')
+      .insert([data])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return newRole;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function updateRole(id: number, data: any) {
-  const res = await fetch(`${ROLE_BASE}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update role');
-  return res.json();
+  try {
+    const { data: updatedRole, error } = await supabase
+      .from('Role')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return updatedRole;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function deleteRole(id: number) {
-  const res = await fetch(`${ROLE_BASE}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete role');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Role')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getPermissions() {
-  const res = await fetch(PERM_BASE);
-  if (!res.ok) throw new Error('Failed to fetch permissions');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('Permission')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 // Get users by role level (for sample logs)
 export const getUsersByRoleLevel = async (level: string): Promise<User[]> => {
-  const response = await fetch(`${API_BASE}/by-role/${level}`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch users by role level');
+  try {
+    const { data, error } = await supabase
+      .from('User')
+      .select('*, role:roleId(name)')
+      .eq('role.name', level);
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
   }
-
-  return response.json();
-}; 
+};

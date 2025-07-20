@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:4000/api';
+import { supabase, handleError } from '../utils/supabaseClient';
 
 // Types for sample receipts
 export interface SampleReceipt {
@@ -21,59 +21,79 @@ export const getSampleReceipts = async (filters?: {
   receivedBy?: string;
   search?: string;
 }): Promise<SampleReceipt[]> => {
-  const params = new URLSearchParams();
-  if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
-  if (filters?.dateTo) params.append('dateTo', filters.dateTo);
-  if (filters?.client) params.append('client', filters.client);
-  if (filters?.project) params.append('project', filters.project);
-  if (filters?.receivedBy) params.append('receivedBy', filters.receivedBy);
-  if (filters?.search) params.append('search', filters.search);
-
-  const url = `${API_BASE_URL}/sample-logs/receipts?${params.toString()}`;
-  console.log('API URL:', url);
-  
-  const token = localStorage.getItem('token');
-  console.log('Token exists:', !!token);
-
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+  try {
+    let query = supabase
+      .from('SampleReceipt')
+      .select('*');
+    
+    // Apply filters
+    if (filters?.dateFrom) {
+      query = query.gte('dateOfReceipt', filters.dateFrom);
     }
-  });
-
-  console.log('Response status:', response.status);
-  console.log('Response ok:', response.ok);
-
-  if (!response.ok) {
-    const error = await response.json();
+    if (filters?.dateTo) {
+      query = query.lte('dateOfReceipt', filters.dateTo);
+    }
+    if (filters?.client) {
+      query = query.eq('clientName', filters.client);
+    }
+    if (filters?.project) {
+      query = query.eq('project', filters.project);
+    }
+    if (filters?.receivedBy) {
+      query = query.eq('receivedBy', filters.receivedBy);
+    }
+    if (filters?.search) {
+      query = query.or(`sampleReceiptNumber.ilike.%${filters.search}%,clientName.ilike.%${filters.search}%,project.ilike.%${filters.search}%`);
+    }
+    
+    console.log('Executing Supabase query');
+    
+    const { data, error } = await query;
+    
+    console.log('Response data:', data);
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
     console.error('API Error:', error);
-    throw new Error(error.error || 'Failed to fetch sample receipts');
+    return handleError(error);
   }
-
-  const data = await response.json();
-  console.log('API Response data:', data);
-  return data;
 };
 
 // Download sample receipt PDF
 export const downloadSampleReceipt = async (sampleId: number): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/samples/${sampleId}/receipt`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to download receipt');
+  try {
+    // First get file path from database
+    const { data: receipt, error: fetchError } = await supabase
+      .from('SampleReceipt')
+      .select('receipt_file_path')
+      .eq('id', sampleId)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    if (!receipt?.receipt_file_path) {
+      throw new Error('Receipt file not found');
+    }
+    
+    // Then download the file from storage
+    const { data, error: downloadError } = await supabase
+      .storage
+      .from('receipts')
+      .download(receipt.receipt_file_path);
+    
+    if (downloadError) throw downloadError;
+    
+    // Create download link
+    const url = window.URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sample-receipt-${sampleId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    return handleError(error);
   }
-
-  const blob = await response.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `sample-receipt-${sampleId}.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  window.URL.revokeObjectURL(url);
-  document.body.removeChild(a);
-}; 
+};

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:4000/api/results';
+import { supabase, handleError } from '../utils/supabaseClient';
 
 interface TestResult {
   id: number;
@@ -18,41 +18,76 @@ type CreateResultData = Omit<TestResult, 'id' | 'createdAt' | 'updatedAt'>;
 type UpdateResultData = Partial<CreateResultData>;
 
 export async function getResults() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error('Failed to fetch results');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('TestResult')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getResult(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch result');
-  return res.json();
+  try {
+    const { data, error } = await supabase
+      .from('TestResult')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function createResult(data: CreateResultData) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create result');
-  return res.json();
+  try {
+    const { data: newResult, error } = await supabase
+      .from('TestResult')
+      .insert([data])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return newResult;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function updateResult(id: number, data: UpdateResultData) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update result');
-  return res.json();
+  try {
+    const { data: updatedResult, error } = await supabase
+      .from('TestResult')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return updatedResult;
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function deleteResult(id: number) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete result');
-  return res.json();
-} 
+  try {
+    const { data, error } = await supabase
+      .from('TestResult')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    return handleError(error);
+  }
+}

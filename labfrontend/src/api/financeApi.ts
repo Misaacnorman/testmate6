@@ -1,3 +1,5 @@
+import { supabase, handleError } from '../utils/supabaseClient';
+
 // Added for compatibility with components
 export interface FinancialTransaction {
   id: number;
@@ -9,7 +11,6 @@ export interface FinancialTransaction {
   balance?: number; // Added for compatibility
   client?: Client;  // Added for compatibility
 }
-const API_BASE_URL = 'http://localhost:4000/api';
 
 // Types
 export interface Invoice {
@@ -121,7 +122,7 @@ export interface ClientAccount {
 }
 
 export interface RevenueReport {
-  revenueByMonth: Record<string, any>;
+  revenueByMonth: Record<string, { total: number; count: number }>;
 }
 
 export interface OutstandingReport {
@@ -131,14 +132,21 @@ export interface OutstandingReport {
 }
 
 export interface CashFlowReport {
-  cashFlowByMonth: Record<string, any>;
+  cashFlowByMonth: Record<string, { total: number; count: number }>;
 }
 
 export interface FinanceReport {
   monthlyRevenue: { month: string; amount: number }[];
-  paymentMethods: any[];
-  topClients: any[];
-  recentActivity: any[];
+  paymentMethods: Array<{ method: string; total: number; count: number }>;
+  topClients: Array<{ clientId: number; name: string; total: number; count: number }>;
+  recentActivity: Array<{ 
+    id: string; 
+    type: string; 
+    date: string; 
+    amount: number; 
+    clientName: string; 
+    description: string 
+  }>;
   totalRevenue: number;
   revenueGrowth: number;
   totalInvoices: number;
@@ -148,74 +156,91 @@ export interface FinanceReport {
   totalPaymentCount: number;
   outstandingAmount: number;
   overdueInvoices: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // API Functions
 export const financeApi = {
-  // Stub: Get a single client account by ID
+  // Client account functions
   async getClientAccount(clientId: number): Promise<ClientAccount> {
-    // This is a stub. Replace with real API call if needed.
-    const accounts = await this.getClientAccounts();
-    const account = accounts.find(acc => acc.clientId === clientId);
-    if (!account) throw new Error('Client account not found');
-    return account;
+    try {
+      const { data, error } = await supabase
+        .from('ClientAccount')
+        .select('*, client:Client(*)')
+        .eq('clientId', clientId)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  // Stub: Get client transactions
-  async getClientTransactions(clientId: number, _dateFrom?: string, _dateTo?: string): Promise<FinancialTransaction[]> {
-    // This is a stub. Replace with real API call if needed.
-    return [
-      {
-        id: 1,
-        clientId,
-        amount: 1000,
-        type: 'credit',
-        date: new Date().toISOString(),
-        description: 'Sample transaction',
-        balance: 1000, // Added for compatibility
-        client: {
-          id: clientId,
-          name: 'Sample Client',
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }, // Added for compatibility
-      },
-    ];
+  async getClientTransactions(clientId: number, dateFrom?: string, dateTo?: string): Promise<FinancialTransaction[]> {
+    try {
+      let query = supabase
+        .from('FinancialTransaction')
+        .select('*, client:Client(*)')
+        .eq('clientId', clientId);
+      
+      if (dateFrom) {
+        query = query.gte('date', dateFrom);
+      }
+      if (dateTo) {
+        query = query.lte('date', dateTo);
+      }
+        
+      const { data, error } = await query.order('date', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  // Stub: Get all transactions
-
-  // Stub: Get all transactions
   async getAllTransactions(): Promise<FinancialTransaction[]> {
-    // This is a stub. Replace with real API call if needed.
-    return [
-      {
-        id: 1,
-        clientId: 1,
-        amount: 1000,
-        type: 'credit',
-        date: new Date().toISOString(),
-        description: 'Sample transaction',
-      },
-    ];
+    try {
+      const { data, error } = await supabase
+        .from('FinancialTransaction')
+        .select('*, client:Client(*)')
+        .order('date', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
+    }
   },
+  
   // Invoice endpoints
   async getInvoices(): Promise<Invoice[]> {
-    const response = await fetch(`${API_BASE_URL}/finance/invoices`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch invoices: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Invoice')
+        .select('*, client:Client(*), invoiceItems:InvoiceItem(*), payments:Payment(*)');
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async getInvoiceById(id: number): Promise<Invoice> {
-    const response = await fetch(`${API_BASE_URL}/finance/invoices/${id}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch invoice: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Invoice')
+        .select('*, client:Client(*), invoiceItems:InvoiceItem(*), payments:Payment(*)')
+        .eq('id', id)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async createInvoice(invoiceData: {
@@ -232,18 +257,56 @@ export const financeApi = {
     terms?: string;
     issuedBy: number;
   }): Promise<Invoice> {
-    const response = await fetch(`${API_BASE_URL}/finance/invoices`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(invoiceData),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to create invoice: ${error.details || error.error || response.statusText}`);
+    try {
+      // Calculate total amounts
+      const itemsTotal = invoiceData.items.reduce((sum, item) => 
+        sum + (item.quantity * item.unitPrice), 0);
+      const taxAmount = itemsTotal * 0.18; // Assuming 18% tax
+      
+      // Create invoice
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('Invoice')
+        .insert([{
+          invoiceNumber: `INV-${Date.now()}`,
+          clientId: invoiceData.clientId,
+          sampleId: invoiceData.sampleId,
+          issuedBy: invoiceData.issuedBy,
+          amount: itemsTotal,
+          taxAmount,
+          totalAmount: itemsTotal + taxAmount,
+          currency: 'UGX',
+          status: 'pending',
+          dueDate: invoiceData.dueDate,
+          issuedDate: new Date().toISOString(),
+          notes: invoiceData.notes,
+          terms: invoiceData.terms
+        }])
+        .select()
+        .single();
+      
+      if (invoiceError) throw invoiceError;
+      
+      // Create invoice items
+      const invoiceItems = invoiceData.items.map(item => ({
+        invoiceId: invoice.id,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.quantity * item.unitPrice,
+        testId: item.testId
+      }));
+      
+      const { error: itemsError } = await supabase
+        .from('InvoiceItem')
+        .insert(invoiceItems);
+      
+      if (itemsError) throw itemsError;
+      
+      // Return complete invoice with items
+      return this.getInvoiceById(invoice.id);
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async updateInvoice(id: number, updateData: {
@@ -252,45 +315,70 @@ export const financeApi = {
     terms?: string;
     dueDate?: string;
   }): Promise<Invoice> {
-    const response = await fetch(`${API_BASE_URL}/finance/invoices/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to update invoice: ${error.details || error.error || response.statusText}`);
+    try {
+      const { error } = await supabase
+        .from('Invoice')
+        .update(updateData)
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Return complete invoice with items
+      return this.getInvoiceById(id);
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async deleteInvoice(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/finance/invoices/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to delete invoice: ${error.details || error.error || response.statusText}`);
+    try {
+      // First delete related invoice items
+      const { error: itemsError } = await supabase
+        .from('InvoiceItem')
+        .delete()
+        .eq('invoiceId', id);
+        
+      if (itemsError) throw itemsError;
+      
+      // Then delete the invoice
+      const { error } = await supabase
+        .from('Invoice')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+    } catch (error) {
+      return handleError(error);
     }
   },
 
   // Payment endpoints
   async getPayments(): Promise<Payment[]> {
-    const response = await fetch(`${API_BASE_URL}/finance/payments`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch payments: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Payment')
+        .select('*, invoice:Invoice(*), receivedByUser:User(*)');
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async getPaymentById(id: number): Promise<Payment> {
-    const response = await fetch(`${API_BASE_URL}/finance/payments/${id}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch payment: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Payment')
+        .select('*, invoice:Invoice(*), receivedByUser:User(*)')
+        .eq('id', id)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async createPayment(paymentData: {
@@ -301,79 +389,153 @@ export const financeApi = {
     notes?: string;
     receivedBy: number;
   }): Promise<Payment> {
-    const response = await fetch(`${API_BASE_URL}/finance/payments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(paymentData),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to create payment: ${error.details || error.error || response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Payment')
+        .insert([{
+          ...paymentData,
+          paymentDate: new Date().toISOString()
+        }])
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      // Update invoice status if fully paid
+      const invoice = await this.getInvoiceById(paymentData.invoiceId);
+      const allPayments = [...(invoice.payments || []), data];
+      const totalPaid = allPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      
+      if (totalPaid >= invoice.totalAmount) {
+        await this.updateInvoice(paymentData.invoiceId, { 
+          status: 'paid',
+          paidDate: new Date().toISOString()
+        });
+      }
+      
+      return data;
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async updatePayment(id: number, updateData: {
     notes?: string;
     reference?: string;
   }): Promise<Payment> {
-    const response = await fetch(`${API_BASE_URL}/finance/payments/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to update payment: ${error.details || error.error || response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('Payment')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   // Client account endpoints
   async getClientAccounts(): Promise<ClientAccount[]> {
-    const response = await fetch(`${API_BASE_URL}/finance/accounts`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch client accounts: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('ClientAccount')
+        .select('*, client:Client(*)');
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   // Report endpoints
   async getRevenueReport(): Promise<RevenueReport> {
-    const response = await fetch(`${API_BASE_URL}/finance/reports/revenue`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch revenue report: ${response.statusText}`);
+    try {
+      const { data: invoices, error } = await supabase
+        .from('Invoice')
+        .select('*')
+        .eq('status', 'paid');
+        
+      if (error) throw error;
+      
+      // Group by month
+      const revenueByMonth: Record<string, { total: number; count: number }> = invoices.reduce((months, inv) => {
+        const month = new Date(inv.paidDate || inv.issuedDate).toISOString().substring(0, 7);
+        if (!months[month]) {
+          months[month] = { total: 0, count: 0 };
+        }
+        months[month].total += inv.totalAmount;
+        months[month].count += 1;
+        return months;
+      }, {} as Record<string, { total: number; count: number }>);
+      
+      return { revenueByMonth };
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async getOutstandingReport(): Promise<OutstandingReport> {
-    const response = await fetch(`${API_BASE_URL}/finance/reports/outstanding`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch outstanding report: ${response.statusText}`);
+    try {
+      const { data: invoices, error } = await supabase
+        .from('Invoice')
+        .select('*, client:Client(*)')
+        .in('status', ['pending', 'overdue']);
+        
+      if (error) throw error;
+      
+      // Calculate total and count overdue
+      const totalOutstanding = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+      const now = new Date();
+      const overdueInvoices = invoices.filter(inv => new Date(inv.dueDate) < now).length;
+      
+      return { invoices, totalOutstanding, overdueInvoices };
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   async getCashFlowReport(): Promise<CashFlowReport> {
-    const response = await fetch(`${API_BASE_URL}/finance/reports/cashflow`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch cash flow report: ${response.statusText}`);
+    try {
+      const { data: payments, error } = await supabase
+        .from('Payment')
+        .select('*');
+        
+      if (error) throw error;
+      
+      // Group by month
+      const cashFlowByMonth: Record<string, { total: number; count: number }> = payments.reduce((months, payment) => {
+        const month = new Date(payment.paymentDate).toISOString().substring(0, 7);
+        if (!months[month]) {
+          months[month] = { total: 0, count: 0 };
+        }
+        months[month].total += payment.amount;
+        months[month].count += 1;
+        return months;
+      }, {} as Record<string, { total: number; count: number }>);
+      
+      return { cashFlowByMonth };
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   // Client endpoints (using users API for now)
   async getClients(): Promise<User[]> {
-    const response = await fetch(`${API_BASE_URL}/users`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch clients: ${response.statusText}`);
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('*, role:Role(*)');
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      return handleError(error);
     }
-    return response.json();
   },
 
   // Utility functions
@@ -410,34 +572,148 @@ export const financeApi = {
     return diffDays > 0 ? diffDays : 0;
   },
 
-  async getFinanceReports(_startDate?: string, _endDate?: string): Promise<FinanceReport> {
-    // Optionally, you can add date filtering if your backend supports it
-    const [revenue, outstanding, cashflow] = await Promise.all([
-      fetch('/api/finance/reports/revenue').then(r => r.json()),
-      fetch('/api/finance/reports/outstanding').then(r => r.json()),
-      fetch('/api/finance/reports/cashflow').then(r => r.json()),
-    ]);
-    // Compose a single object for the FinanceReports component
-    return {
-      ...revenue,
-      ...outstanding,
-      ...cashflow,
-      monthlyRevenue: Object.entries(revenue.revenueByMonth || {}).map(([month, data]: any) => ({
-        month,
-        amount: data.total || 0
-      })),
-      paymentMethods: [], // Fill with real data if available
-      topClients: [], // Fill with real data if available
-      recentActivity: [], // Fill with real data if available
-      totalRevenue: Object.values(revenue.revenueByMonth || {}).reduce((sum: number, d: any) => sum + (d.total || 0), 0),
-      revenueGrowth: 0, // Placeholder
-      totalInvoices: 0, // Placeholder
-      paidInvoices: 0, // Placeholder
-      pendingInvoices: 0, // Placeholder
-      totalPayments: 0, // Placeholder
-      totalPaymentCount: 0, // Placeholder
-      outstandingAmount: 0, // Placeholder
-      overdueInvoices: 0, // Placeholder
-    };
+  async getFinanceReports(startDate?: string, endDate?: string): Promise<FinanceReport> {
+    try {
+      // Get all the necessary data
+      const [revenue, , payments, invoices] = await Promise.all([
+        this.getRevenueReport(),
+        this.getOutstandingReport(), // We get this but don't use it directly, using the data from invoices instead
+        this.getPayments(),
+        this.getInvoices()
+      ]);
+      
+      // Filter by date range if provided
+      let filteredInvoices = invoices;
+      let filteredPayments = payments;
+      
+      if (startDate) {
+        filteredInvoices = filteredInvoices.filter(inv => 
+          new Date(inv.issuedDate) >= new Date(startDate));
+        filteredPayments = filteredPayments.filter(payment => 
+          new Date(payment.paymentDate) >= new Date(startDate));
+      }
+      
+      if (endDate) {
+        filteredInvoices = filteredInvoices.filter(inv => 
+          new Date(inv.issuedDate) <= new Date(endDate));
+        filteredPayments = filteredPayments.filter(payment => 
+          new Date(payment.paymentDate) <= new Date(endDate));
+      }
+      
+      // Calculate payment methods breakdown
+      const paymentMethods = Array.from(
+        filteredPayments.reduce((methods, payment) => {
+          const method = payment.paymentMethod;
+          if (!methods.has(method)) {
+            methods.set(method, { method, total: 0, count: 0 });
+          }
+          const data = methods.get(method)!;
+          data.total += payment.amount;
+          data.count += 1;
+          return methods;
+        }, new Map<string, { method: string; total: number; count: number }>())
+      ).map(([, data]) => data);
+      
+      // Calculate top clients
+      const clientPayments: Record<number, { clientId: number; name: string; total: number; count: number }> = 
+        filteredPayments.reduce((clients, payment) => {
+          const clientId = payment.invoice?.clientId;
+          if (!clientId) return clients;
+          
+          if (!clients[clientId]) {
+            clients[clientId] = { 
+              clientId, 
+              name: payment.invoice?.client?.name || 'Unknown',
+              total: 0,
+              count: 0
+            };
+          }
+          clients[clientId].total += payment.amount;
+          clients[clientId].count += 1;
+          return clients;
+        }, {} as Record<number, { clientId: number; name: string; total: number; count: number }>);
+      
+      const topClients = Object.values(clientPayments)
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+      
+      // Create recent activity from payments and invoices
+      const recentActivity = [
+        ...filteredPayments.map(p => ({
+          id: `payment-${p.id}`,
+          type: 'payment',
+          date: p.paymentDate,
+          amount: p.amount,
+          clientName: p.invoice?.client?.name || 'Unknown',
+          description: `Payment received for invoice ${p.invoice?.invoiceNumber || p.invoiceId}`
+        })),
+        ...filteredInvoices.map(i => ({
+          id: `invoice-${i.id}`,
+          type: 'invoice',
+          date: i.issuedDate,
+          amount: i.totalAmount,
+          clientName: i.client?.name || 'Unknown',
+          description: `Invoice ${i.invoiceNumber} created`
+        }))
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+       .slice(0, 10);
+      
+      // Calculate totals
+      const totalRevenue = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
+      
+      // Calculate total invoices by status
+      const totalInvoices = filteredInvoices.length;
+      const paidInvoices = filteredInvoices.filter(i => i.status === 'paid').length;
+      const pendingInvoices = filteredInvoices.filter(i => i.status === 'pending').length;
+      
+      // Calculate outstandingAmount
+      const outstandingAmount = filteredInvoices
+        .filter(i => ['pending', 'overdue'].includes(i.status))
+        .reduce((sum, i) => sum + i.totalAmount, 0);
+      
+      // Count overdue invoices
+      const now = new Date();
+      const overdueInvoices = filteredInvoices.filter(i => 
+        i.status !== 'paid' && new Date(i.dueDate) < now
+      ).length;
+      
+      // Return complete report
+      return {
+        monthlyRevenue: Object.entries(revenue.revenueByMonth || {}).map(([month, data]) => ({
+          month,
+          amount: data.total || 0
+        })),
+        paymentMethods,
+        topClients,
+        recentActivity,
+        totalRevenue,
+        revenueGrowth: 0, // Would need historical data to calculate
+        totalInvoices,
+        paidInvoices,
+        pendingInvoices,
+        totalPayments: totalRevenue,
+        totalPaymentCount: filteredPayments.length,
+        outstandingAmount,
+        overdueInvoices,
+      };
+    } catch (error) {
+      console.error('Error generating finance reports:', error);
+      // Return empty data structure on error
+      return {
+        monthlyRevenue: [],
+        paymentMethods: [],
+        topClients: [],
+        recentActivity: [],
+        totalRevenue: 0,
+        revenueGrowth: 0,
+        totalInvoices: 0,
+        paidInvoices: 0,
+        pendingInvoices: 0,
+        totalPayments: 0,
+        totalPaymentCount: 0,
+        outstandingAmount: 0,
+        overdueInvoices: 0,
+      };
+    }
   },
-}; 
+};
