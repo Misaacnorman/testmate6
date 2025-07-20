@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getMaterialTests, getMaterialCategories, getMaterialTestsByCategory } from '../api/materialTestsApi';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import '../components/CreateInvoiceModal.css'; // For modal styling
+// import '../components/CreateInvoiceModal.css'; // Removed: modal styling no longer needed
 
 // Define the material categories that trigger the second log type
 const SPECIAL_MATERIALS = ['Cubes', 'Pavers', 'Bricks', 'Blocks', 'Cylinders'];

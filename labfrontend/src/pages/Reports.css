@@ -1,4 +1,3 @@
-.reports {
   padding: 2rem;
   background: #f8fafc;
   min-height: 100vh;
@@ -381,8 +380,7 @@
   background: #fef2f2;
   color: #dc2626;
 }
-
-.category-compliance {
+/* finance category CSS removed */
   background: #f3f4f6;
   color: #6b7280;
 }

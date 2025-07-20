@@ -363,7 +363,7 @@ const Settings = () => {
                   <div className="setting-item">
                     <div className="setting-info">
                       <label>Low Stock Alerts</label>
-                      <p>Get notified when inventory items are running low</p>
+                      {/* Inventory notification removed */}
                     </div>
                     <label className="toggle-switch">
                       <input

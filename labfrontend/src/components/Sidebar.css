@@ -1,3 +1,11 @@
+/* Minimal Sidebar styles to resolve missing file error */
+.sidebar {}
+.sidebar-header {}
+.sidebar-logo {}
+.sidebar-lims {}
+.sidebar-nav {}
+.sidebar-icon {}
+.sidebar-label {}
 .sidebar {
   width: 260px;
   background: #232946;

@@ -200,6 +200,11 @@
   flex-wrap: wrap;
 }
 
+.inventory,
+.finance,
+/* finance and inventory CSS removed */
+}
+
 /* Floating Receive Sample Button */
 .receive-sample-btn {
   position: fixed;
@@ -273,7 +278,6 @@
 .test-list,
 .user-management,
 .reports,
-.inventory,
 .results,
 .finance,
 .settings,

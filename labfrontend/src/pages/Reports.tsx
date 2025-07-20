@@ -105,7 +105,7 @@ const Reports = () => {
     switch (category) {
       case 'samples': return 'category-samples';
       case 'tests': return 'category-tests';
-      case 'finance': return 'category-finance';
+      // finance category removed
       case 'performance': return 'category-performance';
       case 'quality': return 'category-quality';
       case 'compliance': return 'category-compliance';

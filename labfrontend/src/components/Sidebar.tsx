@@ -22,8 +22,7 @@ const ICONS: Record<string, string> = {
   tests: '🔬',
   'material-rates': '💲',
   results: '📊',
-  finance: '💰',
-  inventory: '📦',
+  // finance and inventory icons removed
   reports: '📋',
   users: '👥',
   register: '➕',
