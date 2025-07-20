@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Session } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 
 // Define UserProfile type for better type safety
 export interface UserProfile {

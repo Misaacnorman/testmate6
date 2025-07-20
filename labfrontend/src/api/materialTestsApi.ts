@@ -93,13 +93,13 @@ export async function deleteMaterialTest(id: number) {
 
 export async function deleteAllMaterialTests() {
   try {
-    const { data, error } = await supabase
+    const { data, error }: { data: MaterialTest[] | null, error: any } = await supabase
       .from('MaterialTest')
       .delete()
       .neq('id', 0); // Delete all records
     
     if (error) throw error;
-    return { success: true, count: data?.length || 0 };
+    return { success: true, count: Array.isArray(data) && data ? (data as MaterialTest[]).length : 0 };
   } catch (error) {
     return handleError(error);
   }

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 // ...existing code...
 import { getUsers, getRoles, getPermissions, createRole, updateRole, deleteRole, createUser, updateUser, deleteUser } from '../api/usersApi';
 
@@ -116,10 +117,11 @@ const UserRoleAdmin: React.FC = () => {
   };
   const handleSaveRole = async () => {
     try {
+      const rolePayload = { ...roleForm, permissions: JSON.stringify(roleForm.permissions) };
       if (editingRole) {
-        await updateRole(editingRole.id, { ...roleForm });
+        await updateRole(editingRole.id, rolePayload);
       } else {
-        await createRole(roleForm);
+        await createRole(rolePayload);
       }
       setRoles(await getRoles());
       setShowRoleModal(false);
@@ -498,11 +500,16 @@ const UserRoleAdmin: React.FC = () => {
   );
 };
 
-const UserActionsDropdown: React.FC<{user: User, openEditUser: (user: User) => void, handleDeleteUser: (userId: number) => void}> = ({ user, openEditUser, handleDeleteUser }) => {
+interface UserActionsDropdownProps {
+  user: User;
+  openEditUser: (user: User) => void;
+  handleDeleteUser: (userId: number) => void;
+}
+const UserActionsDropdown: React.FC<UserActionsDropdownProps> = ({ user, openEditUser, handleDeleteUser }) => {
   const [open, setOpen] = React.useState(false);
   return (
     <div style={{display:'inline-block'}}>
-      <button className="user-actions-dash" onClick={()=>setOpen(o=>!o)} style={{fontSize:'2rem',lineHeight:1,background:'none',border:'none',cursor:'pointer',padding:'0 0.5rem',color:'#2563eb'}}>—</button>
+      <button className="user-actions-dash" onClick={() => setOpen((o: boolean) => !o)} style={{fontSize:'2rem',lineHeight:1,background:'none',border:'none',cursor:'pointer',padding:'0 0.5rem',color:'#2563eb'}}>—</button>
       {open && (
         <div className="user-actions-dropdown" style={{position:'absolute',zIndex:10,background:'#fff',boxShadow:'0 2px 8px rgba(0,0,0,0.12)',borderRadius:8,padding:'0.5rem 0',right:0,minWidth:120}}>
           <button className="btn-edit" style={{width:'100%',margin:0,borderRadius:0,background:'none',color:'#2563eb',textAlign:'left',padding:'0.5rem 1rem'}} onClick={()=>{ setOpen(false); openEditUser(user); }}>Edit</button>
@@ -513,11 +520,16 @@ const UserActionsDropdown: React.FC<{user: User, openEditUser: (user: User) => v
   );
 };
 
-const RoleActionsDropdown: React.FC<{role: Role, openEditRole: (role: Role) => void, handleDeleteRole: (roleId: number) => void}> = ({ role, openEditRole, handleDeleteRole }) => {
+interface RoleActionsDropdownProps {
+  role: Role;
+  openEditRole: (role: Role) => void;
+  handleDeleteRole: (roleId: number) => void;
+}
+const RoleActionsDropdown: React.FC<RoleActionsDropdownProps> = ({ role, openEditRole, handleDeleteRole }) => {
   const [open, setOpen] = React.useState(false);
   return (
     <div style={{display:'inline-block'}}>
-      <button className="role-actions-dash" onClick={()=>setOpen(o=>!o)} style={{fontSize:'2rem',lineHeight:1,background:'none',border:'none',cursor:'pointer',padding:'0 0.5rem',color:'#2563eb'}}>—</button>
+      <button className="role-actions-dash" onClick={() => setOpen((o: boolean) => !o)} style={{fontSize:'2rem',lineHeight:1,background:'none',border:'none',cursor:'pointer',padding:'0 0.5rem',color:'#2563eb'}}>—</button>
       {open && (
         <div className="role-actions-dropdown" style={{position:'absolute',zIndex:10,background:'#fff',boxShadow:'0 2px 8px rgba(0,0,0,0.12)',borderRadius:8,padding:'0.5rem 0',right:0,minWidth:120}}>
           <button className="btn-edit" style={{width:'100%',margin:0,borderRadius:0,background:'none',color:'#2563eb',textAlign:'left',padding:'0.5rem 1rem'}} onClick={()=>{ setOpen(false); openEditRole(role); }}>Edit</button>

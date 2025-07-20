@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 // ...existing code...
 import { getUsers, updateUser, deleteUser, getRoles, getPermissions, createRole, updateRole, deleteRole } from '../api/usersApi';
 
@@ -220,10 +221,11 @@ const UserManagement = () => {
   };
   const handleSaveRole = async () => {
     try {
+      const rolePayload = { ...roleForm, permissions: JSON.stringify(roleForm.permissions) };
       if (editingRole) {
-        await updateRole(editingRole.id, { ...roleForm });
+        await updateRole(editingRole.id, rolePayload);
       } else {
-        await createRole(roleForm);
+        await createRole(rolePayload);
       }
       const updatedRoles = await getRoles();
       setRoles(updatedRoles);

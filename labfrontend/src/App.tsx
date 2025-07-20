@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { supabase } from './utils/supabaseClient';
@@ -15,8 +16,9 @@ import UserRoleAdmin from './pages/UserRoleAdmin';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './pages/Profile';
-import React from 'react';
-import { AuthContext, UserProfile } from './utils/authContext';
+import { AuthContext } from './utils/authContext';
+import type { UserProfile } from './utils/authContext';
+import type { Session } from '@supabase/supabase-js';
 
 const NAV = [
   { key: 'dashboard', label: 'Dashboard', component: <Dashboard /> },

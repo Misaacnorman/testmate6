@@ -1,1 +1,0 @@
-// This component referenced finance/inventory modules which have been deleted. Component removed.
