@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabaseClient';
 
 const containerStyle: React.CSSProperties = {
   minHeight: '100vh',
@@ -54,6 +55,7 @@ const linkStyle: React.CSSProperties = {
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
@@ -65,24 +67,43 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setLoading(true);
+    
     try {
-      const res = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      // Use Supabase authentication
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      setMessage('Login successful!');
-      localStorage.setItem('token', data.token);
-      // Store user information for use in other components
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+
+      if (signInError) throw new Error(signInError.message);
+      
+      if (data && data.user) {
+        setMessage('Login successful!');
+        
+        // Fetch user data from our database based on the auth user's ID
+        const { data: userData, error: userError } = await supabase
+          .from('User')
+          .select('*, role:roleId(name)')
+          .eq('auth_id', data.user.id)
+          .single();
+        
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+        }
+        
+        // Store user information
+        if (userData) {
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+        
+        navigate('/');
       }
-      navigate('/');
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError('Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,9 +112,33 @@ const Login = () => {
       <div style={cardStyle}>
         <h2 style={{ marginBottom: 18, color: '#1976d2', fontSize: 32 }}>Sign In</h2>
         <form className="lims-form" onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={inputStyle} autoComplete="username" />
-          <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required style={inputStyle} autoComplete="current-password" />
-          <button type="submit" style={buttonStyle}>Sign In</button>
+          <input 
+            name="email" 
+            type="email" 
+            placeholder="Email" 
+            value={form.email} 
+            onChange={handleChange} 
+            required 
+            style={inputStyle} 
+            autoComplete="username" 
+          />
+          <input 
+            name="password" 
+            type="password" 
+            placeholder="Password" 
+            value={form.password} 
+            onChange={handleChange} 
+            required 
+            style={inputStyle} 
+            autoComplete="current-password" 
+          />
+          <button 
+            type="submit" 
+            style={buttonStyle}
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
         </form>
         {message && <div className="success-msg" style={{ color: '#388e3c', marginTop: 8 }}>{message}</div>}
         {error && <div className="error-msg" style={{ color: '#d32f2f', marginTop: 8 }}>{error}</div>}
