@@ -1,7 +1,6 @@
 {
-  "buildCommand": "cd labfrontend && npm run build",
+  "buildCommand": "cd labfrontend && npm install && npm run build",
   "outputDirectory": "labfrontend/dist",
-  "installCommand": "cd labfrontend && npm install",
-  "devCommand": "cd labfrontend && npm run dev",
+  "installCommand": "npm install",
   "framework": "vite"
 }
