@@ -1,93 +1,62 @@
-# Testmate LIMS Backend
+# My Fullstack App
 
-This is the backend service for Testmate LIMS, a Laboratory Information Management System. It provides RESTful APIs, authentication, business logic, and database management for the platform.
+This project is a fullstack application consisting of a frontend and a backend. Below are the instructions for setting up and running both parts of the application.
 
----
+## Table of Contents
 
-## Features
-- Node.js + Express REST API
-- Prisma ORM with MySQL
-- JWT authentication and role-based access control
-- Dynamic sample registration and per-set details
-- Material-specific log books (concrete, pavers, blocks, cylinders, water absorption, projects)
-- Project, client, user, and finance management
-- PDF generation for sample receipts and logs
+- [Frontend](#frontend)
+- [Backend](#backend)
 
----
+## Frontend
 
-## Project Structure
-- `src/index.js` — Main server entry
-- `src/controllers/` — API controllers (samples, logs, users, receipts, etc.)
-- `src/routes/` — Express route definitions
-- `prisma/schema.prisma` — Database schema
-- `prisma/seed.js` — Seed data script
-- `package.json` — Scripts and dependencies
+The frontend of the application is located in the `labfrontend` directory. It is built using a modern JavaScript framework.
 
----
+### Setup Instructions
 
-## Setup & Installation
+1. Navigate to the `labfrontend` directory:
+   ```
+   cd labfrontend
+   ```
 
-### Prerequisites
-- Node.js (v18+ recommended)
-- MySQL server
+2. Install the dependencies:
+   ```
+   npm install
+   ```
 
-### 1. Environment Setup
-Copy `.env.example` to `.env` and update with your MySQL credentials and JWT secret.
+3. Start the development server:
+   ```
+   npm start
+   ```
 
-### 2. Install Dependencies
-```sh
-npm install
-```
+4. Open your browser and go to `http://localhost:3000` to view the application.
 
-### 3. Database Setup
-```sh
-npm run db:generate      # Generate Prisma client
-npm run db:migrate       # Run migrations
-npm run db:seed          # (Optional) Seed initial data
-npm run db:studio        # (Optional) Open Prisma Studio
-```
+## Backend
 
-### 4. Start the Server
-```sh
-npm run dev
-```
+The backend of the application is located in the `backend` directory. It is built using Node.js and Express.
 
----
+### Setup Instructions
 
-## API Endpoints
-- `/api/samples` — Sample registration, retrieval, update
-- `/api/logs` — Log book management
-- `/api/users` — User management
-- `/api/clients` — Client management
-- `/api/projects` — Project management
-- `/api/receipts` — Sample receipts
-- `/api/finance` — Invoices, payments, transactions
+1. Navigate to the `backend` directory:
+   ```
+   cd backend
+   ```
 
-(See code for full endpoint list and details.)
+2. Install the dependencies:
+   ```
+   npm install
+   ```
 
----
+3. Start the server:
+   ```
+   npm start
+   ```
 
-## Database Schema
-See `prisma/schema.prisma` for full schema. Key models:
-- User, Role, Permission
-- Client, Project, Sample, SampleSet
-- Log, SampleLog, ConcreteCubeLog, BricksBlocksLog, PaversLog, ConcreteCylinderLog, WaterAbsorptionLog, ProjectsLog
-- Invoice, Payment, ClientAccount, FinancialTransaction
-- Report, SystemSetting, InventoryItem
+4. The backend API will be available at `http://localhost:5000`.
 
----
+## Contributing
 
-## Development
-- Use `npm run dev` for development
-- Use `npm run db:studio` to inspect the database
-- Update `.env` for environment variables
-
----
+If you would like to contribute to this project, please fork the repository and submit a pull request.
 
 ## License
-MIT
 
----
-
-## Contact
-For issues or contributions, open an issue or pull request on GitHub.
+This project is licensed under the MIT License. See the LICENSE file for more details.

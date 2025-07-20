@@ -1,3 +1,6 @@
+// This script has been moved to backend/scripts/setup-mysql.js
+// Please update your references accordingly.
+
 const mysql = require('mysql2/promise');
 
 async function setupDatabase() {

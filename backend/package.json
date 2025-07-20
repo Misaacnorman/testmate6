@@ -1,0 +1,17 @@
+{
+  "name": "my-fullstack-app",
+  "version": "1.0.0",
+  "description": "A fullstack application with a frontend and backend.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.10.9"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
