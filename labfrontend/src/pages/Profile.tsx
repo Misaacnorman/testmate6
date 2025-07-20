@@ -103,7 +103,7 @@ const Profile = () => {
         setName(data.name || '');
         setDepartment(data.department || '');
         setUserId(data.id);
-      } catch (err) {
+      } catch {
         setMessage('Failed to load profile');
       }
     };
@@ -134,7 +134,7 @@ const Profile = () => {
       });
       if (!res.ok) throw new Error('Failed to update profile');
       setMessage('Profile updated!');
-    } catch (err) {
+    } catch {
       setMessage('Failed to update profile');
     }
   };
@@ -155,7 +155,7 @@ const Profile = () => {
       if (!res.ok) throw new Error('Failed to reset password');
       setMessage('Password reset!');
       setPassword('');
-    } catch (err) {
+    } catch {
       setMessage('Failed to reset password');
     }
   };

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { financeApi } from '../api/financeApi';
 import type { ClientAccount, FinancialTransaction } from '../api/financeApi';
-// ...existing code...
 
 interface ClientAccountModalProps {
   isOpen: boolean;
@@ -22,33 +21,33 @@ const ClientAccountModal: React.FC<ClientAccountModalProps> = ({ isOpen, onClose
       fetchAccount();
       fetchTransactions();
     }
-  }, [isOpen, clientId, dateFrom, dateTo]);
+  }, [isOpen, clientId, fetchAccount, fetchTransactions]);
 
-  const fetchAccount = async () => {
+  const fetchAccount = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await financeApi.getClientAccount(clientId!);
       setAccount(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load client account');
     } finally {
       setLoading(false);
     }
-  };
+  }, [clientId]);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await financeApi.getClientTransactions(clientId!, dateFrom, dateTo);
       setTransactions(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load transactions');
     } finally {
       setLoading(false);
     }
-  };
+  }, [clientId, dateFrom, dateTo]);
 
   const handleExport = () => {
     // Simple CSV export

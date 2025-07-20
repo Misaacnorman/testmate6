@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getSampleReceipts } from '../api/sampleLogsApi';
 import './Logs.css';
 
@@ -116,7 +116,7 @@ const SampleReceiptsTab = () => {
   const receivedByFilter = '';
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
 
-  const fetchSampleReceipts = async () => {
+  const fetchSampleReceipts = useCallback(async () => {
     try {
       setLoading(true);
       const filters = {
@@ -130,20 +130,20 @@ const SampleReceiptsTab = () => {
       const data = await getSampleReceipts(filters);
       setSampleReceipts(data);
       setError('');
-    } catch (err) {
+    } catch {
       setError('Failed to fetch sample receipts');
       setSampleReceipts([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateFrom, dateTo, clientFilter, projectFilter, receivedByFilter, searchTerm]);
 
   useEffect(() => {
     fetchSampleReceipts();
-  }, []);
+  }, [fetchSampleReceipts]);
 
   useEffect(() => {
-    const handleClickOutside = (_event: MouseEvent) => {
+    const handleClickOutside = () => {
       if (dropdownOpen !== null) {
         setDropdownOpen(null);
       }
@@ -157,8 +157,8 @@ const SampleReceiptsTab = () => {
   const handleDeleteReceipt = async (id: number) => {
     try {
       setSampleReceipts(prev => prev.filter(receipt => receipt.id !== id));
-    } catch (err) {
-      console.error('Error deleting receipt:', err);
+    } catch (error) {
+      console.error('Error deleting receipt:', error);
     }
   };
 

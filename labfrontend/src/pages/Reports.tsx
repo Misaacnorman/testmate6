@@ -6,7 +6,7 @@ interface Report {
   id: number;
   name: string;
   type: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'custom';
-  category: 'samples' | 'tests' | 'finance' | 'performance' | 'quality' | 'compliance';
+  category: 'samples' | 'tests' | 'performance' | 'quality' | 'compliance';
   description: string;
   lastGenerated: string;
   nextScheduled?: string;
@@ -293,7 +293,6 @@ const Reports = () => {
             <option value="all">All Categories</option>
             <option value="samples">Samples</option>
             <option value="tests">Tests</option>
-            <option value="finance">Finance</option>
             <option value="performance">Performance</option>
             <option value="quality">Quality</option>
             <option value="compliance">Compliance</option>

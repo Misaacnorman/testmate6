@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { financeApi } from '../api/financeApi';
 import type { FinancialTransaction, Client } from '../api/financeApi';
-// ...existing code...
 
 const TransactionHistory: React.FC = () => {
   const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
@@ -16,29 +15,29 @@ const TransactionHistory: React.FC = () => {
   useEffect(() => {
     fetchClients();
     fetchTransactions();
-  }, [typeFilter, clientFilter, dateFrom, dateTo]);
+  }, [fetchClients, fetchTransactions]);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       const data = await financeApi.getClients();
       setClients(data);
-    } catch (err) {
+    } catch {
       setClients([]);
     }
-  };
+  }, []);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await financeApi.getAllTransactions();
       setTransactions(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load transactions');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return (
     <div className="transaction-history">

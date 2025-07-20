@@ -228,7 +228,7 @@ const UserManagement = () => {
       const updatedRoles = await getRoles();
       setRoles(updatedRoles);
       setShowRoleModal(false);
-    } catch (err) {
+    } catch {
       alert('Failed to save role');
     }
   };
@@ -237,7 +237,7 @@ const UserManagement = () => {
     try {
       await deleteRole(roleId);
       setRoles(await getRoles());
-    } catch (err) {
+    } catch {
       alert('Failed to delete role');
     }
   };

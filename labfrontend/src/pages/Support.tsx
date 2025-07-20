@@ -44,15 +44,15 @@ const Support = () => {
     },
     {
       id: 4,
-      question: 'How do I manage inventory?',
-      answer: 'Use the Inventory section to add, edit, or remove inventory items.',
-      category: 'general' as TicketCategory
-    },
-    {
-      id: 5,
       question: 'How do I reset my password?',
       answer: 'Contact your system administrator to reset your password.',
       category: 'technical' as TicketCategory
+    },
+    {
+      id: 5,
+      question: 'How do I access documentation?',
+      answer: 'Go to the Support section and click on the Documentation tab to access user guides.',
+      category: 'general' as TicketCategory
     }
   ]);
   const [contactMethods, setContactMethods] = useState<ContactMethod[]>([]);

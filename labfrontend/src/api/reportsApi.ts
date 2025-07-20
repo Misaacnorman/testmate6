@@ -4,7 +4,7 @@ interface Report {
   id: number;
   title: string;
   description?: string;
-  type: 'financial' | 'technical' | 'inventory' | 'summary';
+  type: 'technical' | 'summary';
   dateRange?: { start: string; end: string };
   data?: Record<string, unknown>;
   createdAt: string;
