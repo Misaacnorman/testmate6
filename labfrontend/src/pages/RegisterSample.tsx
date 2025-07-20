@@ -185,11 +185,12 @@ const RegisterSample = () => {
   useEffect(() => {
     if (modalOpen) {
       setLoading(true);
-      getMaterialCategories().then(async (cats: string[]) => {
-        setMaterialCategories(cats);
+      getMaterialCategories().then(async cats => {
+        const stringCats = cats as string[];
+        setMaterialCategories(stringCats);
         const testsByCat: Record<string, any[]> = {};
-        for (const cat of cats) {
-          testsByCat[cat] = await getMaterialTestsByCategory(cat);
+        for (const cat of stringCats) {
+          testsByCat[cat] = await getMaterialTestsByCategory(cat as string);
         }
         setCategoryTests(testsByCat);
         setLoading(false);
