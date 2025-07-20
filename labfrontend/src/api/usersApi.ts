@@ -11,6 +11,24 @@ export interface User {
   };
 }
 
+export interface UserData {
+  name: string;
+  username: string;
+  email: string;
+  status: string;
+  roleId: number;
+  phoneNumber?: string;
+  department?: string;
+  customPermissions?: string;
+}
+
+export interface RoleData {
+  name: string;
+  description: string;
+  permissions: string;
+  isSystemRole: boolean;
+}
+
 export async function getUsers() {
   try {
     const { data, error } = await supabase
@@ -39,7 +57,7 @@ export async function getUser(id: number) {
   }
 }
 
-export async function createUser(data: any) {
+export async function createUser(data: UserData) {
   try {
     // If authentication is required, first create auth user
     // const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -62,7 +80,7 @@ export async function createUser(data: any) {
   }
 }
 
-export async function updateUser(id: number, data: any) {
+export async function updateUser(id: number, data: Partial<UserData>) {
   try {
     const { data: updatedUser, error } = await supabase
       .from('User')
@@ -123,7 +141,7 @@ export async function getRole(id: number) {
   }
 }
 
-export async function createRole(data: any) {
+export async function createRole(data: RoleData) {
   try {
     const { data: newRole, error } = await supabase
       .from('Role')
@@ -138,7 +156,7 @@ export async function createRole(data: any) {
   }
 }
 
-export async function updateRole(id: number, data: any) {
+export async function updateRole(id: number, data: Partial<RoleData>) {
   try {
     const { data: updatedRole, error } = await supabase
       .from('Role')
