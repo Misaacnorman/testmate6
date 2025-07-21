@@ -56,33 +56,31 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    console.log('[AuthProvider] useEffect: fetching initial session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AuthProvider] Initial session:', session);
       setSession(session);
       setLoading(false);
-      
       if (session?.user) {
-        // Fetch user details from our database
+        console.log('[AuthProvider] Session user found, fetching user details...');
         fetchUserDetails(session.user.id);
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[AuthProvider] Auth state changed:', event, session);
         setSession(session);
-        
         if (session?.user) {
+          console.log('[AuthProvider] Auth state: user found, fetching user details...');
           await fetchUserDetails(session.user.id);
         } else {
           setUser(null);
         }
-        
         setLoading(false);
       }
     );
 
-    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
@@ -91,20 +89,20 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user details from custom User table
   const fetchUserDetails = async (authId: string) => {
     try {
+      console.log('[AuthProvider] fetchUserDetails: fetching for authId', authId);
       const { data, error } = await supabase
         .from('User')
         .select('*, role:roleId(name)')
         .eq('auth_id', authId)
         .single();
-        
+      console.log('[AuthProvider] fetchUserDetails: data:', data, 'error:', error);
       if (error) {
-        console.error('Error fetching user data:', error);
+        console.error('[AuthProvider] Error fetching user data:', error);
         return;
       }
-      
       setUser(data as UserProfile);
     } catch (error) {
-      console.error('Error in fetchUserDetails:', error);
+      console.error('[AuthProvider] Error in fetchUserDetails:', error);
     }
   };
 
