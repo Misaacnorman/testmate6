@@ -1,3 +1,12 @@
 {
-  "timeline_index": 1
+  "timeline_index": 4,
+  "planner": {},
+  "gallery_last_file": {},
+  "timeline_status": {
+    "2": 1,
+    "3": 1,
+    "4": 1
+  },
+  "preview_servers": {},
+  "preview_server": null
 }
