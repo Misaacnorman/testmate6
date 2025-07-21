@@ -10,6 +10,11 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+.env.development
+env/
+venv/
+ENV/
 
 # Database files
 *.db
@@ -20,10 +25,16 @@ prisma/dev.db
 # Build outputs
 dist/
 build/
+out/
+bin/
+obj/
+*.o
+*.exe
 *.tsbuildinfo
 
 # Logs
 logs
+logs/
 *.log
 
 # Runtime data
@@ -35,6 +46,7 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+*.coverage
 
 # nyc test coverage
 .nyc_output
@@ -75,7 +87,6 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -88,13 +99,18 @@ public
 # Temporary folders
 tmp/
 temp/
+.temp/
+*.tmp
 
 # Editor directories and files
 .vscode/
+.vscode/extensions.json
 .idea/
+*.iml
 *.swp
 *.swo
 *~
+*.bak
 
 # OS generated files
 .DS_Store
@@ -104,6 +120,7 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Uploads and generated files
 uploads/
@@ -113,4 +130,22 @@ uploads/
 
 # Test files
 test-*.js
-debug-*.js 
+debug-*.js
+test-results/
+
+# Development tools
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.sass-cache/
+.vite_opt_cache/
+*.user
+*.code-workspace
+pnpm-lock.yaml
+*.pyc
+__pycache__
+CMakeFiles/
+CMakeCache.txt
